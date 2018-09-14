@@ -39,7 +39,7 @@
 * Worked with a live production system which handles thousands of real users every month
 * Worked with international team of developers using collaborative tools such as Slack and GitHub
 * Optimized net code to scale user count substantially
-* Worked in both frontend and backend development for server’s website
+* Worked in both frontend and backend development for serverâ€™s website
 * Used analytics and user feedback to iterate and improve on the product
 * Created a web interface and scripting language to streamline content production
 
