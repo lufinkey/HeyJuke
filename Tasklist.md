@@ -1,0 +1,16 @@
+# Task List
+- Research possible OSs to use on Raspberry Pi
+- Set up Raspberry Pi with an OS
+- Write a music player program that utilizes a web browser to play music
+- Implement the Spotify API into the music player
+- Implement the YouTube music API into the music player
+- Implement local playback functionality into the music player 
+- Write a web server that can queue songs to the music player and read the current queue
+- Write a mobile app that can read the queue from the web server and queue new songs
+- Add an NFC reader to the PI for song queueing
+- Write a NFC reader program on the Pi
+- Add screen to the raspberry pi for jukebox / WiFi UI
+- Write a UI for the Pi screen
+- Create a minimal physical shell for the Raspberry Pi server
+- Investigate and patch any security vulnerabilities
+- Write a usage manual for the Raspberry Pi server
