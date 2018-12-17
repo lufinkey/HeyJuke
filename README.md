@@ -2,7 +2,7 @@
 
 ## Table of Contents
 
-1. [Project Abstract](Project-Description.md#Team)
+1. [Project Abstract](Project-Description.md)
 
 2. [Project Description](Project-Description.md#The-Project)
 
@@ -32,10 +32,16 @@
 
 6. [Slideshow](presentation/presentation.pdf)
 
-7. Professional Biographies
+7. [Self-Assessment Essays]()
+
+8. Professional Biographies
 
 	- [Luis Finke](biographies/LuisFinke.md)
 
 	- [John D'Alessandro](biographies/JohnDAlessandro.md)
 
 	- [Joe Hirschfeld](biographies/JoeHirschfeld.md)
+
+9. [Budget](Budget.md)
+
+10. [Appendix](Appendix.md)
