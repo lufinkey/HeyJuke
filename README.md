@@ -4,7 +4,7 @@
 
 1. [Project Abstract](Project-Description.md#Team)
 
-2. [Project Description](Project-Description#The-Project)
+2. [Project Description](Project-Description.md#The-Project)
 
 3. User Stories and Design Diagrams
 
