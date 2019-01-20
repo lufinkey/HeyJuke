@@ -7,7 +7,7 @@ const WEB_SERVER_PORT = 8085;
 const WEB_SOCKET_PORT = 8086;
 
 
-class Server {
+class HeyJukeServer {
 	constructor(options={}) {
 		this._options = {...options};
 
@@ -136,4 +136,4 @@ class Server {
 }
 
 
-module.exports = Server;
+module.exports = HeyJukeServer;
