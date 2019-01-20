@@ -1,13 +1,14 @@
 const { app, BrowserWindow } = require('electron')
+const WebSocket = require("ws")
 
-const commandDict = {
-  "playSong": PlaySong,
-  "playPlaylist": PlayPlaylist,
-  "playAlbum": PlayAlbum,
-  "stop": StopPlaying
-}
+// const commandDict = {
+//   "playSong": PlaySong,
+//   "playPlaylist": PlayPlaylist,
+//   "playAlbum": PlayAlbum,
+//   "stop": StopPlaying
+// }
 
-const socket = new WebSocket('us://localhost:6969')
+const socket = new WebSocket('us://localhost:8086')
 
 let win
 
