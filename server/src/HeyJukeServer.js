@@ -41,10 +41,10 @@ class HeyJukeServer {
 			}
 			this._webSocket = webSocket;
 			webSocket.on('error', (error) => {
-				onSocketError(error);
+				this.onSocketError(error);
 			});
 			webSocket.on('message', (message) => {
-				onSocketMessage(message);
+				this.onSocketMessage(message);
 			});
 			webSocket.on('close', (code, reason) => {
 				console.log("web socket closed: "+code+": "+reason);
