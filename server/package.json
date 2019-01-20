@@ -9,7 +9,7 @@
     "start": "node index.js"
   },
   "author": "Luis Finke (luisfinke@gmail.com)",
-  "license": "UNLICENSED",
+  "license": "Zlib",
   "dependencies": {
     "express": "^4.16.4",
     "ws": "^6.1.2"
