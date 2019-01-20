@@ -1,6 +1,7 @@
 
 const express = require('express');
 const WebSocket = require('ws');
+const Queue = require('./Queue');
 
 
 const WEB_SERVER_PORT = 8085;
@@ -15,6 +16,8 @@ class HeyJukeServer {
 		this._webServer = null;
 		this._webSocketServer = null;
 		this._webSocket = null;
+
+		this._queue = new Queue();
 	}
 
 	get webServerPort() {
