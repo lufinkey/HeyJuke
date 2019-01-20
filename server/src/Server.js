@@ -11,6 +11,7 @@ class Server {
 	constructor(options={}) {
 		this._options = {...options};
 
+		this._expressApp = null;
 		this._webServer = null;
 		this._webSocketServer = null;
 		this._webSocket = null;
@@ -25,7 +26,7 @@ class Server {
 	}
 
 	async _startWebSocketServer() {
-		if(this._webSocketServer != null) {
+		if(this._webSocketServer) {
 			throw new Error("web socket server has already started");
 		}
 		let listening = false;
@@ -55,8 +56,7 @@ class Server {
 		});
 		webSocketServer.on('error', () => {
 			if(!listening) {
-				this._webSocketServer = null;
-				this._webSocketServer.close();
+				webSocketServer.close();
 			}
 		});
 		webSocketServer.on('close', () => {
@@ -64,16 +64,32 @@ class Server {
 		});
 	}
 
+	async _stopWebSocketServer() {
+		if(!this._webSocketServer) {
+			return;
+		}
+		await new Promise((resolve, reject) => {
+			this._webSocketServer.close(() => {
+				resolve();
+			});
+		});
+		this._webSocketServer = null;
+	}
+
 	async _startWebServer() {
-		if(this._webServer != null) {
+		if(this._webServer) {
 			throw new Error("web server has already started");
 		}
-		const webServer = express();
-		this._webServer = webServer;
+		else if(this._expressApp) {
+			throw new Error("web server is already starting");
+		}
+		const expressApp = express();
+		this._expressApp = expressApp;
+		let webServer = null;
 		await new Promise((resolve, reject) => {
-			webServer.listen(this.port, (error) => {
+			webServer = expressApp.listen(this.port, (error) => {
 				if(error) {
-					this._webServer = null;
+					this._expressApp = null;
 					reject(error);
 				}
 				else {
@@ -81,11 +97,33 @@ class Server {
 				}
 			});
 		});
+		this._webServer = webServer;
+	}
+
+	async _stopWebServer() {
+		if(!this._webServer) {
+			return;
+		}
+		this._webServer.close();
+		this._webServer = null;
+		this._expressApp = null;
 	}
 
 	async start() {
-		await this._startWebSocketServer();
-		await this._startWebServer();
+		try {
+			await this._startWebSocketServer();
+			await this._startWebServer();
+		}
+		catch(error) {
+			await this._stopWebServer();
+			await this._stopWebSocketServer();
+			throw error;
+		}
+	}
+
+	async stop() {
+		await this._stopWebServer();
+		await this._stopWebSocketServer();
 	}
 
 	onSocketError(error) {
