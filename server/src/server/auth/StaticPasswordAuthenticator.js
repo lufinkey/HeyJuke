@@ -1,23 +1,25 @@
-const argon2 = require('argon2')
+const argon2 = require('argon2');
+const {BadRequest, Unauthorized} = require('../s15n/ApiError');
 
 class StaticPasswordAuthenticator {
     constructor(hash, capability) {
-        this._hash = hash
+        this._hash = hash;
         this._capability = capability
     }
 
-    validate(payload) {
+    static validate(payload) {
         return payload.hasOwnProperty("password")
     }
 
     async login(payload) {
-        return await this.login(payload.password)
-    }
+        if (payload.password === "undefined")
+            throw new BadRequest("Payload is missing 'password'");
 
-    async login(password) {
-        if (await argon2.verify(this._hash, password))
-            return this._capability
+        if (await argon2.verify(this._hash, payload.password))
+            return this._capability;
         else
-            return null
+            throw new Unauthorized("Password is incorrect")
     }
 }
+
+module.exports = StaticPasswordAuthenticator;

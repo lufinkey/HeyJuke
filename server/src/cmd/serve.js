@@ -1,16 +1,19 @@
 // serve
 
-exports.command = ['serve', '$0']
+exports.command = ['serve', '$0'];
 
 exports.builder = {
-    httpPort: {
+    webServerPort: {
         default: 8085
     },
-    wsPort: {
+    webSocketPort: {
         default: 8086
     }
-}
+};
 
 exports.handler = function(argv) {
-    console.log("tried to serve")
-}
+    const HJS = require('../server/HeyJukeServer');
+    new HJS(argv).start();
+
+    console.log("Done.")
+};
