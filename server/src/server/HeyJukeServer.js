@@ -1,5 +1,5 @@
-
-const express = require('express');
+const Koa = require('koa')
+const Router = require('koa-router')
 const WebSocket = require('ws');
 const Queue = require('./Queue');
 
@@ -85,9 +85,11 @@ class HeyJukeServer {
 		}
 		else if(this._expressApp) {
 			throw new Error("web server is already starting");
-		}
+        }
+        
+
 		const expressApp = express();
-		this._expressApp = expressApp;
+        this._expressApp = expressApp;
 		let webServer = null;
 		await new Promise((resolve, reject) => {
 			webServer = expressApp.listen(this.port, (error) => {

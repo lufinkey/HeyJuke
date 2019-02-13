@@ -1,6 +1,4 @@
-
 const EventEmitter = require('events');
-
 
 class Queue extends EventEmitter {
 	constructor() {
@@ -31,6 +29,5 @@ class Queue extends EventEmitter {
 		return false;
 	}
 }
-
 
 module.exports = Queue;

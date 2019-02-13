@@ -1,3 +1,13 @@
+#!/usr/bin/env node
+
+require('yargs')
+    .usage('Usage: $0 <command> [options]')
+    .commandDir('./src/cmd')
+    .demandCommand()
+    .help()
+    .argv
+    
+/*
 
 const HeyJukeServer = require('./src/HeyJukeServer');
 
@@ -10,4 +20,4 @@ server.start().then(() => {
 	// error;
 	console.error(error);
 	process.exit(1);
-});
+});*/
