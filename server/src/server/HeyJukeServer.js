@@ -1,6 +1,6 @@
-
 const express = require('express');
 const WebSocket = require('ws');
+const Queue = require('./Queue');
 
 
 const WEB_SERVER_PORT = 8085;
@@ -15,6 +15,8 @@ class HeyJukeServer {
 		this._webServer = null;
 		this._webSocketServer = null;
 		this._webSocket = null;
+
+		this._queue = new Queue();
 	}
 
 	get webServerPort() {
@@ -82,12 +84,25 @@ class HeyJukeServer {
 		}
 		else if(this._expressApp) {
 			throw new Error("web server is already starting");
-		}
+        }
+        
+
 		const expressApp = express();
-		this._expressApp = expressApp;
+        this._expressApp = expressApp;
+        // Todo: lmao no
+        const argon = require('argon2');
+        const StaticPasswordAuthenticator = require('./auth/StaticPasswordAuthenticator');
+        const Container = require('./auth/AuthSessionContainer');
+        const AuthManager = require('./auth/AuthManager');
+		expressApp.use(require('morgan')(process.env.NODE_ENV === "production" ? 'common' : 'dev'));
+        expressApp.use(express.json());
+        expressApp.use('/auth', require('./auth/Routes')(
+        	new AuthManager({"password": new StaticPasswordAuthenticator(await argon.hash('test'), null)}),
+			new Container()));
+        expressApp.use(require('./s15n/ErrorHandler'));
 		let webServer = null;
 		await new Promise((resolve, reject) => {
-			webServer = expressApp.listen(this.port, (error) => {
+			webServer = expressApp.listen(this.webServerPort, (error) => {
 				if(error) {
 					this._expressApp = null;
 					reject(error);
