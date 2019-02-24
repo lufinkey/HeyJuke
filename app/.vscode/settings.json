@@ -1,0 +1,9 @@
+{
+	// Enable/disable JavaScript validation.
+	"javascript.validate.enable": false,
+
+	// Is flow enabled
+	"flow.enabled": true,
+	// Path to flow binary. On Windows use '\\' as directory separator
+	"flow.pathToFlow": "${workspaceRoot}/node_modules/.bin/flow"
+}
