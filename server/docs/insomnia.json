@@ -1,7 +1,7 @@
 {
 	"_type": "export",
 	"__export_format": 3,
-	"__export_date": "2019-02-13T03:27:42.001Z",
+	"__export_date": "2019-02-27T17:00:59.776Z",
 	"__export_source": "insomnia.desktop.app:v6.3.2",
 	"resources": [
 		{
@@ -42,6 +42,17 @@
 			"metaSortKey": -1550027797317,
 			"modified": 1550027797317,
 			"name": "auth",
+			"parentId": "wrk_09705f13245a4bdd98b645ea735671e8",
+			"_type": "request_group"
+		},
+		{
+			"_id": "fld_10d9c6bd85b8470fb23ca14842350451",
+			"created": 1551286626729,
+			"description": "",
+			"environment": {},
+			"metaSortKey": -1550027797367,
+			"modified": 1551286629802,
+			"name": "local",
 			"parentId": "wrk_09705f13245a4bdd98b645ea735671e8",
 			"_type": "request_group"
 		},
@@ -131,7 +142,7 @@
 			"isPrivate": false,
 			"metaSortKey": -1550028172321,
 			"method": "POST",
-			"modified": 1550028226976,
+			"modified": 1551286781302,
 			"name": "Logout",
 			"parameters": [
 				{
@@ -148,6 +159,41 @@
 			"settingSendCookies": true,
 			"settingStoreCookies": true,
 			"url": "{{ baseurl  }}/auth/logout",
+			"_type": "request"
+		},
+		{
+			"_id": "req_8cb344d120274a7e8aea1ac63b0e9b02",
+			"authentication": {},
+			"body": {},
+			"created": 1551286704948,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_02acbf76a5f2431fbb7cf6bcc74cf829",
+					"name": "X-Auth-Token",
+					"value": "{% response 'body', 'req_078794066fef4046a7d92cc37286a479', '$.token' %}"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1551286704948,
+			"method": "GET",
+			"modified": 1551286801854,
+			"name": "Search",
+			"parameters": [
+				{
+					"id": "pair_5c8dd54d6fdc4f06a6bde135d49664ef",
+					"name": "query",
+					"value": "SearchTerm"
+				}
+			],
+			"parentId": "fld_10d9c6bd85b8470fb23ca14842350451",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "{{ baseurl  }}/local/search",
 			"_type": "request"
 		}
 	]
