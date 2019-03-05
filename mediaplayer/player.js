@@ -1,31 +1,31 @@
 const WebSocket = require("ws")
+var audio = new Audio();
 
 const commandDict = {
-  "playSong": PlaySong
+  "play-song": PlaySong,
   // "playPlaylist": PlayPlaylist,
   // "playAlbum": PlayAlbum,
-  // "stop": StopPlaying
+  "stop": audio.pause,
+  "continue": audio.play
 }
 const socket = new WebSocket('us://localhost:8086');
 
-var audio = new Audio();
 
-socket.addEventListener("open", (event) => socket.send('event connection opened'))
-
-socket.addEventListener("message", (event) => consumeMessage(event))
+socket.onopen = () => socket.send('event connection opened')
 
 function PlaySong(media, path){
   switch(media){
     case 'local':
       audio.src = path;
       audio.play();
+      socket.send("playback started");
       break;
     default:
       console.log('Invalid Media')
   }
 }
 
-function consumeMessage(event){
+socket.onmessage = (event) => {
   var args = JSON.parse(event.data)
   switch(args[0]){
     case 'command':
