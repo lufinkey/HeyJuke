@@ -30,7 +30,7 @@ react-native run-ios
 
 ### Android
 
-The Android project is located in `ios/HeyJuke.xcodeproj`, which you can open using Xcode. Alternatively, you can just run the following command in a terminal:
+The Android project is located in `android`, which you can open using Android Studio. Alternatively, you can just run the following command in a terminal:
 
 ```bash
 react-native run-android
