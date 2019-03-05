@@ -6,7 +6,7 @@ A mobile app for searching and sending songs to the HeyJuke server
 
 You will need to have [nodejs](https://nodejs.org) installed, along with the `react-native-cli` package.
 
-Run the following command in a terminal:
+When you've done that, `cd` into the project directory and run the following command in a terminal:
 
 ```bash
 npm install
