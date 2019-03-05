@@ -15,6 +15,9 @@ function createWindow () {
 
 app.on('ready', createWindow)
 
+
+app.commandLine.appendSwitch('--autoplay-policy','no-user-gesture-required')
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
@@ -26,4 +29,5 @@ app.on('activate', () => {
     createWindow();
   }
 })
+
 
