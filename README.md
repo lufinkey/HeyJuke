@@ -2,7 +2,10 @@
 
 ## Documentation
 
-[./app/README.md](App Specific)
-[./mediaplayer/README.md](MediaPlayer Specific)
-[./server/README.md](Server Specific)
-[./UC_Requirements/](Requirements)
+[App Specific](./app/README.md)
+
+[MediaPlayer Specific](./mediaplayer/README.md)
+
+[Server Specific](./server/README.md)
+
+[Requirements](./UC_Requirements)
