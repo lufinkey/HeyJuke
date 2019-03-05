@@ -5,6 +5,7 @@
 	};
 	objectVersion = 46;
 	objects = {
+
 /* Begin PBXBuildFile section */
 		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
 		00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
@@ -58,7 +59,6 @@
 		A0C384F521C226CB005A6C86 /* SpotifyAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0C384F221C226CB005A6C86 /* SpotifyAuthentication.framework */; };
 		A0C384F621C226CB005A6C86 /* SpotifyMetadata.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0C384F321C226CB005A6C86 /* SpotifyMetadata.framework */; };
 		A0C384F721C226CB005A6C86 /* SpotifyAudioPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0C384F421C226CB005A6C86 /* SpotifyAudioPlayback.framework */; };
-		A5855786220293E60000B950 /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = A5855780220293E60000B950 /* logo.png */; };
 		A5C1CF552217930200D2EA81 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C1CF162217930200D2EA81 /* JavaScriptCore.framework */; };
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
 		B433B35F96504E7FADCD706E /* libRNOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FC61C15EFD4668B7F0F110 /* libRNOS.a */; };
@@ -848,12 +848,10 @@
 				11FC61C15EFD4668B7F0F110 /* libRNOS.a */,
 				23B8EC7BA67340BB96ED81C4 /* libReactNativeAudioToolkit.a */,
 				F1CD42AA9D9E42A098DDEB9D /* libRNDefaultPreference.a */,
-				4D7C0CE60DC545D3B1D7DAF9 /* libRNThread.a */,
 				551CA9B28ACB47C293ED9830 /* libMusicControl.a */,
 				68CB64B56AF6438FA99210CE /* libSQLite.a */,
 				79CEDF1B78ED4089B407D50B /* libMusicControl-tvOS.a */,
 				BE0A46514D014E20AF92172D /* libSplashScreen.a */,
-				DC57313DC52F42FD927BA02D /* libRNBackgroundTimer.a */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -1553,7 +1551,6 @@
 				CC2832EB662B443A9D3EE412 /* FontAwesome5_Regular.ttf in Resources */,
 				722944BCE36F4522B9E561BB /* FontAwesome5_Solid.ttf in Resources */,
 				D974CED231E34F99BC39B9DC /* Foundation.ttf in Resources */,
-				A5855786220293E60000B950 /* logo.png in Resources */,
 				59464F7DC97F44C2B34893BD /* Ionicons.ttf in Resources */,
 				9D19A75780EE44648A2B8795 /* MaterialCommunityIcons.ttf in Resources */,
 				77B45D2C85374CC19CE0A7BB /* MaterialIcons.ttf in Resources */,
@@ -1700,9 +1697,7 @@
 				INFOPLIST_FILE = HeyJukeTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -1736,9 +1731,7 @@
 				INFOPLIST_FILE = HeyJukeTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -1845,9 +1838,7 @@
 				);
 				INFOPLIST_FILE = "HeyJuke-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -1889,9 +1880,7 @@
 				);
 				INFOPLIST_FILE = "HeyJuke-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -1932,9 +1921,7 @@
 				);
 				INFOPLIST_FILE = "HeyJuke-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -1975,9 +1962,7 @@
 				);
 				INFOPLIST_FILE = "HeyJuke-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",

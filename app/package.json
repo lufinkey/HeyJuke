@@ -37,7 +37,7 @@
     "react-native-threads": "0.0.15",
     "react-native-vector-icons": "^6.1.0",
     "react-navigation": "^3.0.8",
-    "rn-spotify-sdk": "^1.1.8",
+    "rn-spotify-sdk": "^1.2.2",
     "spotify-uri": "^1.0.0",
     "stream-browserify": "^2.0.1",
     "stream-http": "^3.0.0",
