@@ -13,10 +13,16 @@
   "license": "Zlib",
   "dependencies": {
     "argon2": "^0.21.0",
+    "elasticlunr": "^0.9.5",
     "express": "^4.16.4",
     "find-up": "^3.0.0",
     "morgan": "^1.9.1",
+    "music-metadata": "^3.5.3",
+    "sqlite": "^3.0.2",
     "ws": "^6.1.2",
     "yargs": "^13.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10"
   }
 }
