@@ -1,6 +1,6 @@
 const {readFile, writeFile} = require('fs');
 const {join} = require('path');
-const LocalDBUpdate = require('./LocalDBUpdate');
+const {LocalDbUpdate} = require('./LocalDbUpdate');
 
 const elasticlunr = require('elasticlunr');
 // Stopwords don't make any sense for what we are trying to do
@@ -21,7 +21,6 @@ class LocalDb {
     }
 
     markDirty() {
-        console.log("DIRTY");
         this.dirty = true;
     }
 
@@ -40,8 +39,12 @@ class LocalDb {
         return true;
     }
 
+    query(term) {
+        return this.index.search(term);
+    }
+
     createUpdateHelper() {
-        return new LocalDBUpdate(this.index, this.rootPath);
+        return new LocalDbUpdate(this.index, this.rootPath);
     }
 }
 
@@ -84,7 +87,7 @@ const DATABASE_FILE = 'heyjuke_metadata.json';
 async function createLocalDb(sourceRoot) {
     const dbfilepath = join(sourceRoot, DATABASE_FILE);
 
-    return await loadOrCreate(sourceRoot, dbfilepath)
+    return await loadOrCreate(sourceRoot, dbfilepath);
 }
 
 module.exports = {createLocalDb};

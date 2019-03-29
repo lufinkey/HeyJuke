@@ -2,7 +2,7 @@
 
 const {createLocalDb} = require('../server/local/LocalDb');
 
-exports.command = 'index <path>';
+exports.command = 'index <path> [query]';
 
 exports.handler = async function(argv) {
     const path = argv.path;
@@ -18,4 +18,9 @@ exports.handler = async function(argv) {
     const didSave = await localDb.saveIndex();
     if (didSave)
         console.log("New index saved.");
+
+    if (argv.query) {
+        const query = argv.query;
+        console.log(localDb.query(query))
+    }
 };

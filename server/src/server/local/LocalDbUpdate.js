@@ -81,6 +81,7 @@ class LocalDbUpdate {
 
         const document = {
             hash: hash,
+            path: rpath,
             year: metadata.common.year || '',
             title: metadata.common.title || npath.basename(path, npath.extname(path)),
             artist: metadata.common.artist || '',
@@ -155,4 +156,4 @@ class LocalDbUpdate {
     }
 }
 
-module.exports = LocalDbUpdate;
+module.exports = {LocalDbUpdate, SUPPORTED_FILEENDINGS};
