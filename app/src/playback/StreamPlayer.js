@@ -1,17 +1,18 @@
 // @flow
 
 import EventEmitter from 'events';
-import { Player } from 'react-native-audio-toolkit';
+import { Player, MediaStates } from 'react-native-audio-toolkit';
 import type {
 	PlaybackState,
 	PlaybackMetadata,
 	PlaybackEvent
-} from '../providers/types';
+} from '../library/types';
 import AsyncQueue from '../util/AsyncQueue';
 
 
 type PlayOptions = {
-	onPrepare?: ?() => void
+	onPrepare?: ?() => void,
+	position?: number
 }
 
 
@@ -21,9 +22,7 @@ class StreamPlayer extends EventEmitter {
 	_preparedPlayer: ?Player = null;
 	_preparedAudioURL: ?string = null;
 
-	_playQueue: AsyncQueue = new AsyncQueue({
-		cancelUnfinishedTasks: true
-	});
+	_playQueue: AsyncQueue = new AsyncQueue();
 
 	constructor() {
 		super();
@@ -77,14 +76,17 @@ class StreamPlayer extends EventEmitter {
 	}
 
 	_onPlayerEnded = () => {
+		console.log("recieved StreamPlayer event: ended");
 		this.emit('trackFinish');
 	}
 
 	_onPlayerLooped = () => {
+		console.log("recieved StreamPlayer event: looped");
 		this.emit('trackLoop');
 	}
 
 	_onPlayerError = (error: Error) => {
+		console.error("recieved StreamPlayer error: ", error);
 		this.emit('error', error);
 	}
 
@@ -95,36 +97,52 @@ class StreamPlayer extends EventEmitter {
 		if(this._preparedAudioURL === audioURL) {
 			return;
 		}
-		this._destroyPreparedPlayer();
-		const preparedPlayer = this._createPlayer(audioURL)
-		this._preparedPlayer = preparedPlayer;
-		this._preparedAudioURL = audioURL;
-		await new Promise((resolve, reject) => {
-			preparedPlayer.prepare(() => {
-				resolve();
+		const runOptions = {
+			tag: 'prepare',
+			cancelMatchingTags: true
+		};
+		await this._playQueue.run(runOptions, async function * (task: AsyncQueue.Task) {
+			this._destroyPreparedPlayer();
+			const preparedPlayer = this._createPlayer(audioURL)
+			this._preparedPlayer = preparedPlayer;
+			this._preparedAudioURL = audioURL;
+			await new Promise((resolve, reject) => {
+				preparedPlayer.prepare(() => {
+					resolve();
+				});
 			});
-		});
+		}.bind(this));
 	}
 
 	async play(audioURL: string, options: PlayOptions = {}): Promise<void> {
-		await this._playQueue.run(async function * (task: AsyncQueue.Task) {
+		const runOptions = {
+			tag: 'play',
+			cancelMatchingTags: true
+		};
+		await this._playQueue.run(runOptions, async function * (task: AsyncQueue.Task) {
 			if(audioURL == null) {
 				throw new Error("audioURL cannot be null");
 			}
 			// set the new player
 			if(this._playerAudioURL === audioURL) {
+				const player = this._player;
+				if(player == null) {
+					throw new Error("IMPOSSIBLE CASE: _player is null but _playerAudioURL is not null");
+				}
 				await new Promise((resolve, reject) => {
-					if(this._player == null) {
-						resolve();
-						return;
-					}
-					this._player.seek(0, () => {
-						resolve();
+					player.seek((options.position ?? 0) * 1000.0, () => {
+						if(player.isPlaying) {
+							resolve();
+							return;
+						}
+						player.play(() => {
+							resolve();
+						});
 					});
 				});
 				return;
 			}
-			else if(this._preparedAudioURL === audioURL && this._preparedAudioURL != null) {
+			else if(this._preparedAudioURL != null && this._preparedAudioURL === audioURL) {
 				const preparedPlayer = this._preparedPlayer;
 				const preparedAudioURL = this._preparedAudioURL;
 				this._preparedPlayer = null;
@@ -135,7 +153,7 @@ class StreamPlayer extends EventEmitter {
 				this._destroyPreparedPlayer().then(() => {
 					// done
 				}).catch((error) => {
-					console.warn("failed to destroy the prepared player: ", error);
+					console.error("Error destroying prepared player: ", error);
 				});
 				await this._setPlayer(this._createPlayer(audioURL), audioURL);
 			}
@@ -143,12 +161,14 @@ class StreamPlayer extends EventEmitter {
 			if(options.onPrepare) {
 				options.onPrepare();
 			}
+			const player = this._player;
+			if(player == null) {
+				throw new Error("IMPOSSIBLE CASE: player is null after calling setup");
+			}
+			const playerPos = (options.position ?? 0) * 1000;
+			const playerCurrentPos = Math.max(player.currentTime, 0);
 			await new Promise((resolve, reject) => {
-				if(this._player == null) {
-					resolve();
-					return;
-				}
-				this._player.play((error) => {
+				player.play((error) => {
 					if(error) {
 						reject(error);
 					}
@@ -158,89 +178,105 @@ class StreamPlayer extends EventEmitter {
 					}
 				});
 			});
+			if(playerCurrentPos !== playerPos) {
+				await new Promise((resolve, reject) => {
+					player.seek(playerPos, () => {
+						resolve();
+					});
+				});
+			}
+			this.emit('play');
+
 		}.bind(this));
 	}
 
 	async setPlaying(playing: boolean): Promise<void> {
-		if(this._player == null) {
-			return;
-		}
-		const wasPlaying = this._player.isPlaying;
-		let isPlaying = wasPlaying;
-		if(playing) {
-			await new Promise((resolve, reject) => {
-				if(this._player == null) {
-					resolve();
-					return;
-				}
-				this._player.play((error) => {
-					if(error) {
-						reject(error);
-					}
-					else {
-						isPlaying = true;
-						resolve();
-					}
+		const runOptions = {
+			tag: 'setPlaying',
+			cancelMatchingTags: true
+		};
+		await this._playQueue.run(runOptions, async function * (task: AsyncQueue.Task) {
+			const player = this._player;
+			if(player == null) {
+				return;
+			}
+			const wasPlaying = player.isPlaying;
+			let isPlaying = wasPlaying;
+			if(playing) {
+				await new Promise((resolve, reject) => {
+					player.play((error) => {
+						if (error) {
+							reject(error);
+						}
+						else {
+							isPlaying = true;
+							resolve();
+						}
+					});
 				});
-			});
+			}
+			else {
+				await new Promise((resolve, reject) => {
+					player.pause((error) => {
+						if(error) {
+							reject(error);
+						}
+						else {
+							isPlaying = false;
+							resolve();
+						}
+					});
+				});
+			}
 			if(!wasPlaying && isPlaying) {
 				this.emit('play');
 			}
-		}
-		else {
-			await new Promise((resolve, reject) => {
-				if(this._player == null) {
-					resolve();
-					return;
-				}
-				this._player.pause((error) => {
-					if(error) {
-						reject(error);
-					}
-					else {
-						isPlaying = false;
-						resolve();
-					}
-				});
-			});
-			if(wasPlaying && !isPlaying) {
+			else if(wasPlaying && !isPlaying) {
 				this.emit('pause');
 			}
-		}
+		}.bind(this));
 	}
 
 	async stop(): Promise<void> {
-		this._playQueue.cancelAllTasks();
-		if(!this._player) {
-			return;
-		}
-		await this._playQueue.run(async () => {
+		const runOptions = {
+			tag: 'stop',
+			cancelMatchingTags: true
+		};
+		await this._playQueue.run(runOptions, async function * (task: AsyncQueue.Task) {
 			await Promise.all([this._destroyPlayer(), this._destroyPreparedPlayer()]);
-		});
+		}.bind(this));
 	}
 
 	get state(): ?PlaybackState {
-		if(!this._player) {
+		const player = this._player;
+		if(!player) {
 			return null;
 		}
 		return {
-			playing: this._player.isPlaying,
-			repeating: this._player.looping,
-			position: this._player.currentTime / 1000.0,
-			duration: this._player.duration / 1000.0
+			playing: player.isPlaying,
+			repeating: player.looping,
+			position: player.currentTime / 1000.0,
+			duration: player.duration / 1000.0
 		};
 	}
 
 	async seek(position: number): Promise<void> {
-		await new Promise((resolve, reject) => {
-			if(this._player == null) {
-				resolve();
-				return;
-			}
-			this._player.seek(position * 1000, () => {
-				resolve();
+		const runOptions = {
+			tag: 'seek',
+			cancelMatchingTags: true
+		};
+		await this._playQueue.run(runOptions, async function * (task: AsyncQueue.Task) {
+			await new Promise((resolve, reject) => {
+				const player = this._player;
+				if(!player) {
+					resolve();
+					return;
+				}
+				player.seek(position * 1000, () => {
+					resolve();
+				});
 			});
-		});
+		}.bind(this));
 	}
 }
 

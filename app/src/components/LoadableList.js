@@ -16,7 +16,7 @@ import {
 	Text
 } from '../components/theme';
 
-import type { ContinuousAsyncGenerator } from '../providers/types';
+import type { ContinuousAsyncGenerator } from '../library/types';
 import { sleep } from '../util/misc';
 
 
@@ -196,7 +196,7 @@ export default class LoadableList extends PureComponent<Props,State> {
 					{(this.state.error) ? (
 						<Text style={styles.footerErrorText}>{this.state.error.message}</Text>
 					) : (this.state.loading) ? (
-						<ActivityIndicator animating={true} size={'small'} color={Theme.textColor} style={styles.footerLoadIndicator}/>
+						<ActivityIndicator animating={true} size={'small'} style={styles.footerLoadIndicator}/>
 					) : null}
 				</View>
 			);
@@ -208,7 +208,7 @@ export default class LoadableList extends PureComponent<Props,State> {
 			// loading
 			return (
 				<View style={this.props.style}>
-					<ActivityIndicator animating={true} size={'large'} color={Theme.textColor} style={styles.loadIndicator}/>
+					<ActivityIndicator animating={true} size={'large'} style={styles.loadIndicator}/>
 				</View>
 			);
 		}

@@ -19,7 +19,7 @@ import {
 
 import {
 	Album
-} from '../providers/types';
+} from '../library/types';
 
 
 type Props = {

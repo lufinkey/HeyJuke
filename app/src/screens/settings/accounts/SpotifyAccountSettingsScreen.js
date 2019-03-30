@@ -16,7 +16,7 @@ import {
 	Text
 } from '../../../components/theme';
 
-import SpotifyProvider from '../../../providers/SpotifyProvider';
+import SpotifyProvider from '../../../library/providers/SpotifyProvider';
 import Spotify from 'rn-spotify-sdk';
 
 
@@ -41,7 +41,6 @@ export default class SpotifyAccountSettingsScreen extends PureComponent<Props,St
 	constructor(props: Props) {
 		super(props);
 
-		const currentTime = (new Date()).getTime();
 		this.state = {
 			loggedIn: SpotifyProvider.isLoggedIn,
 			sessionExpireSeconds: null,
@@ -192,17 +191,17 @@ const styles = StyleSheet.create({
 		height: 80,
 	},
 
-	roundedButtonText: {
-		fontSize: 20,
-		textAlign: 'center',
-		color: 'white',
-	},
 	roundedButton: {
 		justifyContent: 'center',
 		borderRadius: 18,
 		overflow: 'hidden',
 		width: 200,
 		height: 40,
+	},
+	roundedButtonText: {
+		fontSize: 20,
+		textAlign: 'center',
+		color: 'white',
 	},
 
 	loginButton: {

@@ -2,30 +2,50 @@
 
 import {
 	MediaItem,
-	MediaProvider,
 	Track,
 	Album,
 	Artist,
 	Playlist
-} from './types';
+} from '../types';
 import type {
 	AsyncAlbumGenerator,
+	MediaProvider,
+	MediaPlaybackProvider,
 	PlaybackState,
 	PlaybackMetadata,
-	PlaybackEvent
-} from './types';
+	PlaybackEvent,
+	ContinuousAsyncGenerator
+} from '../types';
 
 import EventEmitter from 'events';
 import RNEvents from 'react-native-events';
 import Spotify from 'rn-spotify-sdk';
 const SpotifyURI = require('spotify-uri');
 
-import AsyncQueue from '../util/AsyncQueue';
+import AsyncQueue from '../../util/AsyncQueue';
 import {
 	waitForEvent,
 	sleep
-} from '../util/misc';
+} from '../../util/misc';
+import type { MediaLibraryItem } from '../types/MediaLibraryItem';
 
+
+type UserLibraryResumeId = {
+	mostRecentItem: {
+		trackURI: string,
+		addedAt: string
+	},
+	syncingOffset: ?number,
+	syncingItem: ?{
+		trackURI: string,
+		addedAt: string
+	},
+	syncingMostRecentItem: ?{
+		trackURI: string,
+		addedAt: string
+	}
+}
+export type SpotifyUserLibraryResumeId = UserLibraryResumeId;
 
 class SpotifyProvider implements MediaProvider {
 	+name = 'spotify';
@@ -33,8 +53,9 @@ class SpotifyProvider implements MediaProvider {
 
 	+events = new EventEmitter();
 	_nativeEvents: EventEmitter;
-
 	+usesStreamPlayer: boolean = false;
+
+	+api = Spotify;
 
 	_loggedIn: boolean = false;
 	_lastTemporaryIssuesTime: number = 0;
@@ -55,25 +76,15 @@ class SpotifyProvider implements MediaProvider {
 	constructor() {
 		// forward events from rn-spotify-sdk
 		this._nativeEvents = new EventEmitter();
-		RNEvents.addSubscriber(Spotify, this._nativeEvents);
-		const eventForwards = {
-			play: 'play',
-			contextFinish: 'audioDeliveryDone',
-			metadataChange: 'metadataChange'
-		};
-		for(const eventName in eventForwards) {
-			const eventForward = eventForwards[eventName];
-			this._nativeEvents.addListener(eventForward, (event) => {
-				this._onPlaybackEvent(event);
-				this.events.emit(eventName, this._createPlaybackEvent(event));
-			});
-		}
-		Spotify.isLoggedInAsync().then((loggedIn) => {
+		RNEvents.addSubscriber(this.api, this._nativeEvents);
+		this.api.isLoggedInAsync().then((loggedIn) => {
 			this._loggedIn = loggedIn;
 		});
-		this._nativeEvents.addListener('pause', this._onPause);
 		this._nativeEvents.addListener('login', this._onLogin);
 		this._nativeEvents.addListener('logout', this._onLogout);
+		this._nativeEvents.addListener('play', this._onPlay);
+		this._nativeEvents.addListener('pause', this._onPause);
+		this._nativeEvents.addListener('metadataChange', this._onMetadataChange);
 		this._nativeEvents.addListener('trackDelivered', this._onTrackDelivered);
 		this._nativeEvents.addListener('trackChange', this._onTrackChange);
 		this._nativeEvents.addListener('playerMessage', this._onPlayerMessage);
@@ -85,7 +96,7 @@ class SpotifyProvider implements MediaProvider {
 	}
 
 	destroy() {
-		RNEvents.removeSubscriber(Spotify, this._nativeEvents);
+		RNEvents.removeSubscriber(this.api, this._nativeEvents);
 	}
 
 	async _fetchUserDataIfNeeded() {
@@ -98,10 +109,10 @@ class SpotifyProvider implements MediaProvider {
 		if(this._userData == null) {
 			this._userDataPromise = (async () => {
 				try {
-					this._userData = await Spotify.getMe();
+					this._userData = await this.api.getMe();
 				}
 				catch(error) {
-					console.warn("Error fetching user data: ", error);
+					console.error("Error fetching user data: ", error);
 				}
 				this._userDataPromise = null;
 			})();
@@ -113,9 +124,10 @@ class SpotifyProvider implements MediaProvider {
 		await this._setPlayingQueue.run(async function * (task: AsyncQueue.Task) {
 			while(true) {
 				try {
-					await Spotify.setPlaying(true);
+					await this.api.setPlaying(true);
 					yield;
 					if(!this._isPlaying) {
+						console.log("waiting for play event to fire");
 						await waitForEvent(this._nativeEvents, 'play', (event: any) => {
 							// hooray, it was called!
 						}, {timeout: 2000});
@@ -123,7 +135,7 @@ class SpotifyProvider implements MediaProvider {
 					return;
 				}
 				catch(error) {
-					console.warn("Error attempting to play Spotify player: ", error);
+					console.error("Error attempting to play Spotify player: ", error);
 					// continue trying...
 				}
 				yield;
@@ -151,70 +163,88 @@ class SpotifyProvider implements MediaProvider {
 				}
 			}*/
 		}
-	}
-
-	_onPause = (event: any) => {
-		this._onPlaybackEvent(event);
-		this.events.emit('pause', this._createPlaybackEvent(event));
-	}
+	};
 
 	_onLogin = () => {
+		console.log("received Spotify event: login");
 		this._loggedIn = true;
 		this.events.emit('login');
-	}
+	};
 
 	_onLogout = () => {
+		console.log("received Spotify event: logout");
 		this._loggedIn = false;
 		this._userData = null;
 		this.events.emit('logout');
-	}
+	};
+
+	_onPlay = (event: Object) => {
+		console.log("received Spotify event: play");
+		this._onPlaybackEvent(event);
+		this.player.events.emit('play', this._createPlaybackEvent(event));
+	};
+
+	_onPause = (event: Object) => {
+		console.log("received Spotify event: pause");
+		this._onPlaybackEvent(event);
+		this.player.events.emit('pause', this._createPlaybackEvent(event));
+	};
+
+	_onMetadataChange = (event: Object) => {
+		console.log("received Spotify event: metadataChange");
+		this._onPlaybackEvent(event);
+		this.player.events.emit('metadataChange', this._createPlaybackEvent(event));
+	};
 
 	_onBecomeInactive = (event: any) => {
-		//
-	}
+		console.log("received Spotify event: inactive");
+	};
 
 	_onBecomeActive = (event: any) => {
-		//
-	}
+		console.log("received Spotify event: active");
+	};
 
 	_onDisconnect = () => {
-		//
-	}
+		console.log("received Spotify event: disconnect");
+	};
 
 	_onReconnect = () => {
-		//
-	}
+		console.log("received Spotify event: reconnect");
+	};
 
 	_onTrackDelivered = (event: any) => {
+		console.log("received Spotify event: trackDelivered");
 		this._trackPlaying = false;
 		this._isPausing = false;
 		this._onPlaybackEvent(event);
-		this.events.emit('trackFinish', this._createPlaybackEvent(event));
-	}
+		this.player.events.emit('trackFinish', this._createPlaybackEvent(event));
+	};
 
 	_onTrackChange = (event: any) => {
+		console.log("received Spotify event: trackChange")
 		this._trackPlaying = true;
-	}
+	};
 
 	_onPlayerMessage = (message: string) => {
-		//
-	}
+		console.log("received Spotify player message: "+message);
+	};
 
 	_onTemporaryPlayerError = () => {
+		console.warn("received Spotify event: temporaryPlayerError");
 		this._lastTemporaryIssuesTime = (new Date()).getTime();
-	}
+	};
 
 
 
 
 	async login(): Promise<boolean> {
-		const loggedIn = await Spotify.login({showDialog: true});
+		const loggedIn = await this.api.login({showDialog: true});
 		this._fetchUserDataIfNeeded();
 		return loggedIn;
 	}
 
 	async logout(): Promise<void> {
-		await Spotify.logout();
+		await this.api.logout();
 	}
 
 	get isLoggedIn() {
@@ -223,17 +253,17 @@ class SpotifyProvider implements MediaProvider {
 
 
 	_preParseAlbum(album: any) {
+		const albumID = this._parseItemId(album.uri);
 		const trackResults = album.tracks;
 		if(trackResults) {
-			album.tracks = trackResults.items || [];
 			// fix Spotify's dumbassery
 			if(trackResults.next === 'null') {
 				trackResults.next = null;
 			}
-			if(trackResults.next || (!trackResults.items && trackResults.total > 0)) {
+			if(trackResults.next || trackResults.offset !== 0 || !trackResults.items || trackResults.total == null || trackResults.total > trackResults.items.length) {
 				album.asyncLoad = {
 					loader: async (index: number, count: number): Promise<Array<any>> => {
-						const { items, next } = await Spotify.getAlbumTracks(album.id, {
+						const { items, next } = await this.api.getAlbumTracks(albumID, {
 							offset: index,
 							limit: count,
 							market: 'from_token'
@@ -249,12 +279,12 @@ class SpotifyProvider implements MediaProvider {
 	}
 
 	_preParsePlaylist(playlist: any) {
+		const playlistID = this._parseItemId(playlist.uri);
 		const trackResults = playlist.tracks;
 		if(trackResults) {
-			playlist.tracks = trackResults.items || [];
 			playlist.asyncLoad = {
 				loader: async (index: number, count: number): Promise<Array<any>> => {
-					const { items, next } = await Spotify.getPlaylistTracks(playlist.id, {
+					const { items, next } = await this.api.getPlaylistTracks(playlistID, {
 						snapshot_id: playlist.snapshot_id,
 						offset: index,
 						limit: count,
@@ -294,7 +324,7 @@ class SpotifyProvider implements MediaProvider {
 		};
 		const { types } = options;
 		delete options.types;
-		const results = await Spotify.search(text, types, options);
+		const results = await this.api.search(text, types, options);
 		// fix spotify dumbassery
 		for(const typeName of ['tracks','artists','albums','playlists']) {
 			const typeResults = results[typeName];
@@ -337,7 +367,7 @@ class SpotifyProvider implements MediaProvider {
 	async getTrack(trackId: string): Promise<Track> {
 		await this._fetchUserDataIfNeeded();
 		trackId = this._parseItemId(trackId);
-		const track = await Spotify.getTrack(trackId, {
+		const track = await this.api.getTrack(trackId, {
 			market: 'from_token'
 		});
 		return new Track(track, this);
@@ -346,7 +376,7 @@ class SpotifyProvider implements MediaProvider {
 	async getArtist(artistId: string): Promise<Artist> {
 		await this._fetchUserDataIfNeeded();
 		artistId = this._parseItemId(artistId);
-		const artist = await Spotify.getArtist(artistId, {
+		const artist = await this.api.getArtist(artistId, {
 			market: 'from_token'
 		});
 		return new Artist(artist, this);
@@ -359,7 +389,7 @@ class SpotifyProvider implements MediaProvider {
 		let offset = 0;
 		while(true) {
 			try {
-				let { items, next } = await Spotify.getArtistAlbums(artistId, {
+				let { items, next } = await this.api.getArtistAlbums(artistId, {
 					offset: offset,
 					market: 'from_token'
 				});
@@ -387,7 +417,7 @@ class SpotifyProvider implements MediaProvider {
 	async getAlbum(albumId: string): Promise<Album> {
 		await this._fetchUserDataIfNeeded();
 		albumId = this._parseItemId(albumId);
-		const albumData = await Spotify.getAlbum(albumId, {
+		const albumData = await this.api.getAlbum(albumId, {
 			market: 'from_token'
 		});
 		return new Album(this._preParseAlbum(albumData), this);
@@ -396,56 +426,179 @@ class SpotifyProvider implements MediaProvider {
 	async getPlaylist(playlistId: string): Promise<Playlist> {
 		await this._fetchUserDataIfNeeded();
 		playlistId = this._parseItemId(playlistId);
-		const playlistData = await Spotify.getPlaylist(playlistId, {
+		const playlistData = await this.api.getPlaylist(playlistId, {
 			market: 'from_token'
 		});
 		return new Playlist(this._preParsePlaylist(playlistData), this);
 	}
 
-	async prepare(track: Track): Promise<void> {
-		// can't really "prepare" with this SDK
-		await this._fetchUserDataIfNeeded();
+	async * generateUserLibrary(resumeId: ?UserLibraryResumeId = null): ContinuousAsyncGenerator<{resumeId:UserLibraryResumeId,items:Array<MediaLibraryItem>,progress:number}> {
+		let mostRecentItem = resumeId?.mostRecentItem;
+		let syncingOffset = resumeId?.syncingOffset;
+		let syncingItem = resumeId?.syncingItem;
+		let syncingMostRecentItem = resumeId?.syncingMostRecentItem;
+		let offset: number = (syncingOffset != null && syncingItem) ? syncingOffset : 0;
+		let progress = 0;
+		while(true) {
+			let results: any = null;
+			try {
+				results = await this.api.getMyTracks({
+					offset: offset,
+					limit: 50,
+					market: 'from_token'
+				});
+			}
+			catch(error) {
+				yield { error };
+				continue;
+			}
+			let { items, total, next } = results;
+			items = items.map((item): MediaLibraryItem => ({
+				track: (this.createMediaItem(item.track): any),
+				libraryProvider: this.name,
+				addedAt: (item.added_at) ? (new Date(item.added_at)).getTime() : null
+			}));
+			// fix spotify's bullshit
+			if(next === 'null') {
+				next = null;
+			}
+			if(offset === 0) {
+				// set the "working" most recent item
+				const item = items[0];
+				syncingMostRecentItem = item ? {
+					trackURI: item.track.uri,
+					addedAt: item.addedAt
+				} : null;
+			}
+			// check if we're resuming a sync
+			else if(offset === syncingOffset && syncingItem) {
+				const firstItem = items[0];
+				const trackURI = firstItem?.track.uri;
+				const addedAt = firstItem?.addedAt;
+				// if the item we just got doesn't match the item we stopped at, cache and restart from offset 0
+				if(!firstItem || syncingItem.trackURI !== trackURI || syncingItem.addedAt !== addedAt) {
+					syncingOffset = null;
+					syncingItem = null;
+					syncingMostRecentItem = null;
+					resumeId = {
+						mostRecentItem: (mostRecentItem: any),
+						syncingOffset,
+						syncingItem,
+						syncingMostRecentItem
+					};
+					yield { result: {
+						resumeId,
+						items,
+						progress
+					}};
+					offset = 0;
+					continue;
+				}
+			}
+			// calculate progress
+			progress = (offset + items.length) / total;
+			// check if we're finished syncing
+			let finished = false;
+			if(!next) {
+				finished = true;
+			}
+			else if(mostRecentItem) {
+				for(const item of items) {
+					if(item.addedAt == null || item.addedAt < mostRecentItem.addedAt) {
+						finished = true;
+						break;
+					}
+				}
+			}
+			if(finished) {
+				resumeId = {
+					mostRecentItem: (syncingMostRecentItem: any),
+					syncingOffset: null,
+					syncingItem: null,
+					syncingMostRecentItem: null
+				};
+				return { result: {
+					resumeId,
+					items,
+					progress
+				}};
+			}
+			else {
+				const lastIndex = items.length - 1;
+				const lastItem = items[lastIndex];
+				syncingOffset = (lastIndex >= 0) ? (offset + lastIndex) : null;
+				syncingItem = {
+					trackURI: lastItem.track.uri,
+					addedAt: lastItem.addedAt
+				};
+				resumeId = {
+					mostRecentItem: (mostRecentItem: any),
+					syncingOffset,
+					syncingItem,
+					syncingMostRecentItem
+				};
+				yield { result: {
+					resumeId,
+					items,
+					progress
+				}};
+			}
+			offset += items.length;
+		}
 	}
 
-	async play(track: Track): Promise<void> {
-		this._setPlayingQueue.cancelAllTasks();
-		await this._playQueue.run(async function * (task: AsyncQueue.Task) {
+
+
+	+player: MediaPlaybackProvider = {
+		events: new EventEmitter(),
+
+		prepare: async (track: Track): Promise<void> => {
+			// can't really "prepare" with this SDK
 			await this._fetchUserDataIfNeeded();
-			yield;
-			await Spotify.playURI(track.uri, 0, 0);
-			this._trackPlaying = true;
-			yield;
-			this._setPlayingUntilSuccess();
-		}.bind(this));
-	}
+		},
 
-	async setPlaying(playing: boolean): Promise<void> {
-		if(!playing && this._isPlaying) {
-			this._isPausing = true;
+		play: async (track: Track, position: number = 0): Promise<void> => {
+			console.log("Playing Spotify track " + track.name);
 			this._setPlayingQueue.cancelAllTasks();
+			await this._playQueue.run(async function* (task: AsyncQueue.Task) {
+				await this._fetchUserDataIfNeeded();
+				yield;
+				await this.api.playURI(track.uri, 0, position);
+				this._trackPlaying = true;
+				yield;
+				this._setPlayingUntilSuccess();
+			}.bind(this));
+		},
+
+		setPlaying: async (playing: boolean): Promise<void> => {
+			if (!playing && this._isPlaying) {
+				this._isPausing = true;
+				this._setPlayingQueue.cancelAllTasks();
+			}
+			await this.api.setPlaying(playing);
+		},
+
+		stop: async (): Promise<void> => {
+			console.log("Stopping spotify player");
+			this._playQueue.cancelAllTasks();
+			this._setPlayingQueue.cancelAllTasks();
+			if (this._isPlaying) {
+				this._isPausing = true;
+			}
+			await this.api.setPlaying(false);
+		},
+
+		seek: async (position: number): Promise<void> => {
+			await this.api.seek(position);
+		},
+
+		getMetadata: async (): Promise<PlaybackMetadata> => {
+			return await this.api.getPlaybackMetadataAsync();
+		},
+
+		getState: async (): Promise<PlaybackState> => {
+			return await this.api.getPlaybackStateAsync();
 		}
-		await Spotify.setPlaying(playing);
-	}
-
-	async stop(): Promise<void> {
-		this._playQueue.cancelAllTasks();
-		this._setPlayingQueue.cancelAllTasks();
-		if(this._isPlaying) {
-			this._isPausing = true;
-		}
-		await Spotify.setPlaying(false);
-	}
-
-	async seek(position: number): Promise<void> {
-		await Spotify.seek(position);
-	}
-
-	async getPlayerMetadata(): Promise<PlaybackMetadata> {
-		return await Spotify.getPlaybackMetadataAsync();
-	}
-
-	async getPlayerState(): Promise<PlaybackState> {
-		return await Spotify.getPlaybackStateAsync();
 	}
 }
 

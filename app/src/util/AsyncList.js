@@ -2,6 +2,7 @@
 
 import { sleep } from './misc';
 import AsyncQueue from './AsyncQueue';
+import type { AsyncQueueFunction } from './AsyncQueue';
 import EventEmitter from 'events';
 
 
@@ -10,9 +11,9 @@ type ChunkType = Promise<void> | true | void;
 export type AsyncListOptions<ItemType> = {
 	initialItems?: Array<ItemType>,
 	initialItemsOffset?: number,
-	length: number,
+	length: ?number,
 	chunkSize: number,
-	loader: (index: number, count: number) => Promise<Array<ItemType>>,
+	loader: (index: number, count: number, list: AsyncList<ItemType>) => Promise<Array<ItemType>>,
 	noOverwrite?: boolean,
 	mutators?: {
 		// mutators apply the mutation to the server/source, and then call a flush event to apply the mutations to the AsyncList
@@ -42,7 +43,7 @@ export default class AsyncList<ItemType> {
 		const initialItemsOffset = options.initialItemsOffset || 0;
 		const chunkSize = options.chunkSize;
 		this.items = [];
-		this.items.length = options.length;
+		this.items.length = options.length ?? (initialItemsOffset + initialItems.length);
 
 		// get chunk range
 		this._chunks = [];
@@ -55,7 +56,10 @@ export default class AsyncList<ItemType> {
 		}
 		// set initial items
 		for(let i=0; i<initialItems.length; i++) {
-			this.items[initialItemsOffset+i] = initialItems[i];
+			const item = initialItems[i];
+			if(item) {
+				this.items[initialItemsOffset + i] = item;
+			}
 		}
 		// set loaded chunks
 		for(let i=startLoadedChunkIndex; i<endLoadedChunkIndex; i++) {
@@ -65,6 +69,7 @@ export default class AsyncList<ItemType> {
 			for(let j=startIndex; j<endIndex; j++) {
 				if(!this.items[j]) {
 					chunkLoaded = false;
+					break;
 				}
 			}
 			if(chunkLoaded) {
@@ -122,31 +127,30 @@ export default class AsyncList<ItemType> {
 
 	getItem(index: number): ?ItemType | Promise<?ItemType> {
 		const item = this.items[index];
-		if(item == null) {
-			let promise = this._itemPromises[index];
-			if(promise) {
-				return promise;
-			}
-			promise = (async () => {
-				try {
-					await this.loadChunkForItemIndex(index);
-				}
-				finally {
-					const cmpPromise = this._itemPromises[index];
-					if(promise === cmpPromise) {
-						delete this._itemPromises[index];
-					}
-				}
-				return (this.items[index]: any);
-			})();
-			this._itemPromises[index] = promise;
+		if(item) {
+			return item;
+		}
+		let promise = this._itemPromises[index];
+		if(promise) {
 			return promise;
 		}
-		return item;
+		promise = (async () => {
+			try {
+				await this.loadChunkForItemIndex(index);
+			}
+			finally {
+				const cmpPromise = this._itemPromises[index];
+				if(promise === cmpPromise) {
+					delete this._itemPromises[index];
+				}
+			}
+			return (this.items[index]: any);
+		})();
+		this._itemPromises[index] = promise;
+		return promise;
 	}
 
 	getLoadedItems(startIndex: number = 0): Array<ItemType> {
-		const items = [];
 		let chunkIndex = this.getChunkIndexForItemIndex(startIndex);
 		const chunkSize = this.chunkSize;
 		const chunkCount = this.chunkCount;
@@ -203,7 +207,7 @@ export default class AsyncList<ItemType> {
 		const chunkStartIndex = chunkIndex * chunkSize;
 		const chunk = (async () => {
 			try {
-				const newItems = await this._options.loader(chunkStartIndex, chunkSize);
+				const newItems = await this._options.loader(chunkStartIndex, chunkSize, this);
 				const cmpPromise = this._chunks[chunkIndex];
 				if(chunk === cmpPromise) {
 					// chunk was loaded, so add the items and set the chunk to `true`
@@ -221,13 +225,18 @@ export default class AsyncList<ItemType> {
 						}
 						itemIndex += 1;
 					}
-					this._chunks[chunkIndex] = true;
+					if(newItems.length > 0) {
+						this._chunks[chunkIndex] = true;
+					}
+					else {
+						delete this._chunks[chunkIndex];
+					}
 				}
 			}
 			finally {
 				// clean up if there was an error and we weren't able to set the chunk to `true`
-				const cmpPromise = this._chunks[chunkIndex];
-				if(chunk === cmpPromise) {
+				const cmpChunk = this._chunks[chunkIndex];
+				if(chunk === cmpChunk) {
 					delete this._chunks[chunkIndex];
 				}
 			}
@@ -237,7 +246,6 @@ export default class AsyncList<ItemType> {
 	}
 
 	async loadChunkIndex(chunkIndex: number): Promise<void> {
-		const chunkSize = this.chunkSize;
 		// check if there's already a chunk loaded or loading
 		let chunk = this._chunks[chunkIndex];
 		if(chunk instanceof Promise) {
@@ -269,8 +277,8 @@ export default class AsyncList<ItemType> {
 		});
 	}
 
-	async lock<T>(handler: (task: AsyncQueue.Task) => Promise<T>): Promise<T> {
-		return await this._mutationQueue.run(handler);
+	async lock(handler: AsyncQueueFunction) {
+		await this._mutationQueue.run(handler);
 	}
 
 	_setNeedsChunkReEvaluation() {
@@ -346,7 +354,7 @@ export default class AsyncList<ItemType> {
 	}
 
 	async insertBefore(items: Array<ItemType>, before: ?ItemType) {
-		return await this.lock(async (task: AsyncQueue.Task) => {
+		await this.lock(async (task: AsyncQueue.Task) => {
 			if(this._options.mutators) {
 				await this._options.mutators.insert(items, before, this);
 			}
@@ -373,7 +381,7 @@ export default class AsyncList<ItemType> {
 	}
 
 	async remove(items: ItemType | Array<ItemType>) {
-		return await this.lock(async (task: AsyncQueue.Task) => {
+		await this.lock(async (task: AsyncQueue.Task) => {
 			if(!(items instanceof Array)) {
 				items = [items];
 			}
@@ -394,8 +402,10 @@ export default class AsyncList<ItemType> {
 	_onInsert({items, index}: {items: Array<ItemType>, index: number}) {
 		this._insert(items, index);
 	}
+	_onInsert = this._onInsert.bind(this);
 
 	_onRemove({index, count}: {index: number, count: number}) {
 		this._remove(index, count);
 	}
+	_onRemove = this._onRemove.bind(this);
 }

@@ -13,8 +13,8 @@ import {
 	Text
 } from '../../components/theme';
 
-import SpotifyProvider from '../../providers/SpotifyProvider';
-import BandcampProvider from '../../providers/BandcampProvider';
+import SpotifyProvider from '../../library/providers/SpotifyProvider';
+import BandcampProvider from '../../library/providers/BandcampProvider';
 import TableView from '../../components/TableView';
 
 

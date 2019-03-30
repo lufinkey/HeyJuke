@@ -18,7 +18,7 @@ import PlayerBar from './PlayerBar';
 import type {
 	PlaybackState,
 	PlaybackMetadata
-} from '../../providers/types';
+} from '../../library/types';
 
 
 type Props = {

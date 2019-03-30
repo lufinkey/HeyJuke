@@ -2,10 +2,8 @@
 
 import React, { PureComponent } from 'react';
 import {
-	ActivityIndicator,
 	Alert,
 	Image,
-	SectionList,
 	StyleSheet,
 	TouchableOpacity,
 	View
@@ -22,7 +20,8 @@ import {
 	Track,
 	Album,
 	TrackCollectionItem
-} from '../providers/types';
+} from '../library/types';
+import QueueItem from '../playback/QueueItem';
 
 import ActionSheet from './ActionSheet';
 import type { ActionSheetOption } from './ActionSheet';
@@ -35,7 +34,8 @@ export type MediaItemMenuOptionKey =
 	'view-album' |
 	'view-artist';
 
-type ItemType = MediaItem | TrackCollectionItem;
+
+type ItemType = MediaItem | TrackCollectionItem | QueueItem;
 
 type MediaItemRowActions = {
 	viewAlbum: () => Promise<void>,
@@ -101,7 +101,7 @@ export default class MediaItemRow extends PureComponent<Props,State> {
 	}
 
 	static getMediaItem(item: ItemType): MediaItem {
-		if(item instanceof TrackCollectionItem) {
+		if(item instanceof QueueItem || item instanceof TrackCollectionItem) {
 			return item.track;
 		}
 		return item;
@@ -119,7 +119,16 @@ export default class MediaItemRow extends PureComponent<Props,State> {
 				key: 'add-to-queue',
 				text: "Add to Queue",
 				onSelect: () => {
-					// TODO add to HeyJuke queue
+					// TODO add to queue
+				}
+			});
+		}
+		if(item instanceof QueueItem) {
+			menuOptions.push({
+				'key': 'remove-from-queue',
+				'text': "Remove from Queue",
+				onSelect: () => {
+					// TODO remove from queue
 				}
 			});
 		}
@@ -206,7 +215,34 @@ export default class MediaItemRow extends PureComponent<Props,State> {
 	}
 
 	onPress() {
-		// TODO handle track press
+		const item = this.props.item;
+		if(item instanceof Track || item instanceof TrackCollectionItem || item instanceof QueueItem) {
+			// TODO main press action
+		}
+		else if(item.type === 'album') {
+			if(this.props.navigation) {
+				this.props.navigation.push('Album', {
+					uri: item.uri,
+					provider: item.provider
+				});
+			}
+		}
+		else if(item.type === 'artist' || item.type === 'label') {
+			if(this.props.navigation) {
+				this.props.navigation.push('Artist', {
+					uri: item.uri,
+					provider: item.provider
+				});
+			}
+		}
+		else if(item.type === 'playlist') {
+			if(this.props.navigation) {
+				this.props.navigation.push('Playlist', {
+					uri: item.uri,
+					provider: item.provider
+				});
+			}
+		}
 	}
 	onPress = this.onPress.bind(this);
 

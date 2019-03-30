@@ -19,9 +19,11 @@ import {
 
 import TrackCollectionScreen from './TrackCollectionScreen';
 import {
-	Playlist,
+	Playlist
+} from '../../library/types';
+import type {
 	MediaProvider
-} from '../../providers/types';
+} from '../../library/types';
 
 
 type Props = {
@@ -38,9 +40,13 @@ export default class PlaylistScreen extends PureComponent<Props,State> {
 		super(props);
 	}
 
-	fetchCollection = async (uri: string, provider: MediaProvider): Promise<Playlist> => {
-		const playlist = await provider.getPlaylist(uri);
-		return playlist;
+	fetchCollection = async (): Promise<Playlist> => {
+		const uri: string = this.props.navigation.getParam('uri');
+		const provider: MediaProvider = this.props.navigation.getParam('provider');
+		if(!provider.getPlaylist) {
+			throw new Error("cannot get playlist from provider");
+		}
+		return await provider.getPlaylist(uri);
 	}
 
 	render() {

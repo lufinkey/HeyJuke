@@ -22,20 +22,19 @@ import LoadableView from '../../components/LoadableView';
 import MediaItemRow from '../../components/MediaItemRow';
 import type { MediaItemMenuOptionKey } from '../../components/MediaItemRow';
 import {
-	Album,
-	MediaProvider,
 	Track,
 	TrackCollection,
 	TrackCollectionItem
-} from '../../providers/types';
+} from '../../library/types';
 import type {
-	AsyncTrackGenerator
-} from '../../providers/types';
+	AsyncTrackGenerator,
+	MediaProvider
+} from '../../library/types';
 
 
 type Props = {
 	navigation: Object,
-	fetchCollection: (uri: string, provider: MediaProvider) => Promise<TrackCollection>
+	fetchCollection: () => Promise<TrackCollection>
 }
 
 type State = {
@@ -62,14 +61,6 @@ export default class TrackCollectionScreen extends PureComponent<Props,State> {
 		};
 	}
 
-	get collectionURI() {
-		return this.props.navigation.getParam('uri');
-	}
-
-	get provider() {
-		return this.props.navigation.getParam('provider');
-	}
-
 	get collection() {
 		return this.state.collection;
 	}
@@ -86,9 +77,7 @@ export default class TrackCollectionScreen extends PureComponent<Props,State> {
 	}
 
 	async loadCollection() {
-		const uri = this.collectionURI;
-		const provider = this.provider;
-		const collection = await this.props.fetchCollection(uri, provider);
+		const collection = await this.props.fetchCollection();
 		if(!this.mounted) {
 			return;
 		}
@@ -118,12 +107,15 @@ export default class TrackCollectionScreen extends PureComponent<Props,State> {
 	}
 
 	renderCollectionHeader = () => {
+		const imageURL = this.state.imageURL;
 		return (
 			<View style={styles.collectionHeader}>
-				<Image
-					style={styles.collectionImage}
-					resizeMode={'cover'}
-					source={{uri: (this.state.imageURL || undefined)}}/>
+				{(imageURL) ? (
+					<Image
+						style={styles.collectionImage}
+						resizeMode={'cover'}
+						source={{uri: imageURL}}/>
+				) : null}
 				<Text style={styles.collectionName}>{this.state.collection?.name || ""}</Text>
 			</View>
 		);
@@ -187,12 +179,12 @@ const styles = StyleSheet.create({
 	collectionImage: {
 		width: 180,
 		height: 180,
-		marginTop: 12,
-		marginBottom: 10
+		marginTop: 12
 	},
 	collectionName: {
 		fontSize: 24,
 		fontWeight: 'bold',
+		marginTop: 10,
 		marginBottom: 10,
 		textAlign: 'center'
 	}

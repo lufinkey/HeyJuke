@@ -2,8 +2,14 @@
 
 import { MediaProvider } from './MediaProvider';
 import MediaItem from './MediaItem';
+import type { MediaItemData } from './MediaItem';
 
 import Album from './Album';
+
+
+export type ArtistData = MediaItemData & {
+	//
+}
 
 
 export default class Artist extends MediaItem {
@@ -20,5 +26,9 @@ export default class Artist extends MediaItem {
 				return new Album(album, provider);
 			});
 		}
+	}
+
+	toData(): ArtistData {
+		return super.toData();
 	}
 }

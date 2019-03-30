@@ -19,7 +19,7 @@ import {
 	Text
 } from '../../../components/theme';
 
-import SpotifyProvider from '../../../providers/SpotifyProvider';
+import SpotifyProvider from '../../../library/providers/SpotifyProvider';
 import SpotifyAllSearchResultsScreen from './SpotifyAllSearchResultsScreen';
 import SpotifySingleTypeSearchResultsScreen from './SpotifySingleTypeSearchResultsScreen';
 

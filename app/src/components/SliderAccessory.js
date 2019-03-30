@@ -23,7 +23,8 @@ type Props = {
 	minValue: number,
 	maxValue: number,
 	step: number,
-	units?: string,
+	labelWidth?: number,
+	createLabelString?: ((value: number) => string),
 	style?: ?Object | ?Array<Object>
 }
 
@@ -76,9 +77,8 @@ export default class SliderAccessory extends PureComponent<Props,State> {
 							value
 						});
 					}}/>
-				<Text style={styles.text}>{"" +
-					this.state.value +
-					((this.props.units != null) ? (" "+this.props.units) : "")
+				<Text style={[styles.text, {width: this.props.labelWidth}]}>{
+					this.props.createLabelString ? this.props.createLabelString(this.state.value) : (""+this.state.value)
 				}</Text>
 			</View>
 		);
@@ -89,7 +89,6 @@ export default class SliderAccessory extends PureComponent<Props,State> {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		maxWidth: '50%',
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center'

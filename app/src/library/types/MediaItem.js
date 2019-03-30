@@ -5,8 +5,19 @@ import { MediaProvider } from './MediaProvider';
 
 export type MediaItemImage = {
 	url: string,
-	width?: number,
-	height?: number
+	size?: string,
+	width: ?number,
+	height: ?number
+}
+
+
+export type MediaItemData = {
+	type: string,
+	uri: ?string,
+	provider: string,
+	name: string,
+	explicit: ?boolean,
+	images: ?Array<MediaItemImage>
 }
 
 
@@ -60,7 +71,7 @@ export default class MediaItem {
 			aspectRatioTolerance=0.1,
 			allowNull=false } = options;
 		// get image list from data
-		let images = this.images;
+		let images = this.images ?? [];
 		if(images.length === 1 && !allowNull) {
 			return images[0];
 		}
@@ -112,7 +123,7 @@ export default class MediaItem {
 		return null;
 	}
 
-	get images(): Array<MediaItemImage> {
+	get images(): ?Array<MediaItemImage> {
 		if(this._data.images && this._data.images.length > 0) {
 			return this._data.images;
 		}
@@ -122,19 +133,23 @@ export default class MediaItem {
 		else if(this._data.imageURL) {
 			return [{
 				url: this._data.imageURL,
-				size: 'medium'
+				size: 'medium',
+				width: null,
+				height: null
 			}];
 		}
 		else if(this._data.albumCoverArtURL) {
 			return [{
 				url: this._data.albumCoverArtURL,
-				size: 'medium'
+				size: 'medium',
+				width: null,
+				height: null
 			}];
 		}
 		else if(this._data.artist && this._data.artist.images && this._data.artist.images.length > 0) {
 			return this._data.artist.images;
 		}
-		return [];
+		return null;
 	}
 
 
@@ -162,6 +177,17 @@ export default class MediaItem {
 
 	onFetchData(data: any) {
 		// Open for implementation
+	}
+
+	toData(): MediaItemData {
+		return {
+			type: this.type,
+			uri: this.uri,
+			provider: this.provider.name,
+			name: this.name,
+			explicit: this.explicit,
+			images: this.images
+		};
 	}
 }
 

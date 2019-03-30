@@ -1,7 +1,7 @@
 // @flow
 
 import EventEmitter from 'events';
-import type { ContinuousAsyncGenerator } from '../providers/types/Generators';
+import type { ContinuousAsyncGenerator } from '../library/types/Generators';
 
 
 

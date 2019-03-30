@@ -22,12 +22,12 @@ import {
 import PlayButton from './PlayButton';
 import {
 	Track
-} from '../../providers/types';
+} from '../../library/types';
 import type {
 	MediaItemImage,
 	PlaybackState,
 	PlaybackMetadata
-} from '../../providers/types';
+} from '../../library/types';
 
 
 type Props = {

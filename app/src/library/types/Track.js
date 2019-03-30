@@ -1,8 +1,10 @@
 // @flow
 
 import { MediaProvider } from './MediaProvider';
-import TrackCollection from './TrackCollection';
 import MediaItem from './MediaItem';
+import type {
+	MediaItemData
+} from "./MediaItem";
 
 import Album from './Album';
 import Artist from './Artist';
@@ -13,8 +15,30 @@ import {
 } from './parse';
 
 
+export type TrackData = MediaItemData & {
+	uri: string,
+	album: ?{
+		uri: string,
+		provider: string,
+		type: string,
+		name: string
+	},
+	artists: ?Array<{
+		uri: string,
+		provider: string,
+		type: string,
+		name: string
+	}>,
+	duration: ?number,
+	playable: boolean,
+	audioURL: ?string
+}
+
+
 export default class Track extends MediaItem {
 	type: string = 'track';
+
+	+uri: string;
 
 	album: ?Album = null;
 	artists: ?Array<Artist> = null;
@@ -54,18 +78,28 @@ export default class Track extends MediaItem {
 
 	get genre(): ?string {
 		const genre = this.data.genre;
-		if(genre) {
-			return genre;
+		if(!genre) {
+			return null;
 		}
-		return null;
+		return genre;
 	}
 
 	get tags(): ?Array<string> {
 		const tags = this.data.tags;
-		if(tags) {
-			return tags.slice(0);
+		if(!tags) {
+			return null;
 		}
-		return null;
+		return tags.slice(0);
+	}
+
+	get diskNumber(): ?number {
+		const data = this.data;
+		return data.diskNumber ?? data.disc_number ?? data.diskNum ?? null;
+	}
+
+	get trackNumber(): ?number {
+		const data = this.data;
+		return data.trackNumber ?? data.track_number ?? data.trackNum ?? null;
 	}
 
 	isSingle(): boolean {
@@ -80,13 +114,13 @@ export default class Track extends MediaItem {
 
 	isPlayable(): boolean {
 		const data = this.data;
-		if(typeof data.playable === 'boolean') {
+		if(data.playable != null) {
 			return data.playable;
 		}
-		else if(typeof data.is_playable === 'boolean') {
+		else if(data.is_playable != null) {
 			return data.is_playable;
 		}
-		else if(data.available_markets instanceof Array && data.available_markets.length == 0) {
+		else if(data.available_markets instanceof Array && data.available_markets.length === 0) {
 			return false;
 		}
 		return true;
@@ -97,12 +131,12 @@ export default class Track extends MediaItem {
 	}
 
 	isMissingArtistData(): boolean {
-		return (!this.artists || this.artists.length == 0 || !this.artists[0].uri);
+		return (!this.artists || this.artists.length === 0 || !this.artists[0].uri);
 	}
 
 	isMissingAudioData(): boolean {
 		const data = this.data;
-		if(typeof data.playable === 'boolean' && !data.playable) {
+		if(data.playable != null && !data.playable) {
 			return false;
 		}
 		else if(!this.audioURL && this.provider.usesStreamPlayer) {
@@ -136,5 +170,26 @@ export default class Track extends MediaItem {
 		if(newData.imageURL != null) {
 			data.imageURL = newData.imageURL;
 		}
+	}
+
+	toData(): TrackData {
+		const data = (super.toData(): any);
+		return Object.assign(data, {
+			album: this.album ? {
+				uri: this.album.uri,
+				provider: this.album.provider.name,
+				type: this.album.type,
+				name: this.album.name
+			} : null,
+			artists: this.artists ? this.artists.map((artist: Artist) => ({
+				type: artist.type,
+				uri: artist.uri,
+				provider: artist.provider.name,
+				name: artist.name
+			})) : null,
+			duration: this.duration,
+			playable: this.isPlayable(),
+			audioURL: this.audioURL
+		});
 	}
 }
