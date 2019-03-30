@@ -3,6 +3,8 @@ package com.heyjuke;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.peel.react.TcpSocketsModule;
+import com.tradle.react.UdpSocketsModule;
 import org.devio.rn.splashscreen.SplashScreenReactPackage;
 import com.tanguyantoine.react.MusicControl;
 import com.kevinresol.react_native_default_preference.RNDefaultPreferencePackage;
@@ -35,6 +37,8 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new TcpSocketsModule(),
+            new UdpSocketsModule(),
             new SplashScreenReactPackage(),
             new MusicControl(),
             new RNDefaultPreferencePackage(),
