@@ -98,10 +98,17 @@ class HeyJukeServer {
         const argon = require('argon2');
         const Capability = require('./auth/StaticCapabilities');
         const StaticPasswordAuthenticator = require('./auth/StaticPasswordAuthenticator');
+        const AnonymousAuthenticator = require('./auth/AnonymousAuthenticator');
         const Container = require('./auth/AuthSessionContainer');
         const AuthManager = require('./auth/AuthManager');
         const {createLocalDb} = require('./local/LocalDb');
         const LocalDbCollection = require('./local/LocalDbCollection');
+        const Beacon = require('./beacon/Beacon');
+
+        this.beacon = new Beacon(this.webServerPort, "HeyJuke Test", "0.0.0.0");
+        await this.beacon.socketBind();
+        this.beacon.startTimer();
+
         expressApp.use(require('morgan')(process.env.NODE_ENV === "production" ? 'common' : 'dev'));
         expressApp.use(express.json());
 
@@ -128,9 +135,13 @@ class HeyJukeServer {
                     "password": new StaticPasswordAuthenticator(
                         await argon.hash('test'),
                         authedCapability
+                    ),
+                    "anonymous": new AnonymousAuthenticator(
+                        unauthedCapability
                     )
                 }),
             session));
+
         expressApp.use('/local', require('./local/Routes')(
             session, local
         ));
@@ -167,7 +178,7 @@ class HeyJukeServer {
         } catch (error) {
             await this._stopWebServer();
             await this._stopWebSocketServer();
-            throw error;
+            console.log(error)
         }
     }
 
