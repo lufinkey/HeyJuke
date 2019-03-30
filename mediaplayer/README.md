@@ -3,6 +3,8 @@
 2. From this folder, run npm start to launch the Electron app
 3. Communicate to Electron from the Server
 
+## Commands
+
 ```
 {"command": "play-song", "source":[media], "uri":[path]}
 ```
@@ -21,3 +23,25 @@ Stops whatever is currently playing.
 {"command": "continue"}
 ```
 Resumes or restarts playback of current song.
+
+## Events
+
+```
+playback ended
+```
+The currently playing song has ended
+
+```
+playback paused
+```
+The currently playing song has paused at a location
+
+```
+playback resume
+```
+The currently playing song has resumed from a paused location
+
+```
+playback started
+```
+The play-song command was successful

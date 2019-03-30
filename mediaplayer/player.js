@@ -5,28 +5,60 @@ var bandcamp = new BandcampAPI();
 
 const commandDict = {
   "play-song": playSong,
-  // "playPlaylist": PlayPlaylist,
-  // "playAlbum": PlayAlbum,
   "stop": stop,
   "continue": resume
 }
 
+audio.onended = () => send("playback ended");
+
+// websocket stuff
+
 var socket = new WebSocket('us://localhost:8086');
 
 var connectAttempts = 0
-
 socket.onerror = () => {
   console.log("error " + connectAttempts);
 }
 
-socket.onopen = () => socket.send('event connection opened')
+socket.onopen = () => send('event connection opened')
+
+// youtube
+
+var ytplayer;
+function onYouTubeIframeAPIReady() {
+  ytplayer = new YT.Player('player', {
+    height: '100',
+    width: '100',
+    events: {
+      'onReady': onPlayerReady,
+      'onStateChange': onPlayerStateChange
+    }
+  });
+}
+
+function onPlayerReady(event) {
+  event.target.playVideo();
+}
+
+var done = false;
+function onPlayerStateChange(event) {
+  if (event.data == YT.PlayerState.PLAYING && !done) {
+    setTimeout(stopVideo, 6000);
+    done = true;
+  }
+}
+function stopVideo() {
+  player.stopVideo();
+}
+
+// playing api stuff
 
 async function playSong(args){
   switch(args["media"]){
     case 'local':
       audio.src = args["uri"];
       audio.play();
-      socket.send("playback started");
+      send("playback started");
       break;
     case 'bandcamp':
       console.log(args)
@@ -34,7 +66,11 @@ async function playSong(args){
       console.log(result);
       audio.src = result.audioURL;
       audio.play();
-      socket.send("playback started");
+      send("playback started");
+      break;
+    case 'youtube':
+      player.loadVideoById(args["uri"], "small")
+      player.playVideo();
       break;
     default:
       console.log('Invalid Media')
@@ -43,15 +79,21 @@ async function playSong(args){
 
 async function stop(args){
   audio.pause();
-  socket.send("playback paused")
+  send("playback paused")
 }
 
 async function resume(args){
   audio.play();
-  socket.send("playback resumed")
+  send("playback resumed")
 }
 
 socket.onmessage = (event) => {
-  var args = JSON.parse(event.data)
+  var args = JSON.parse(event.data);
+  console.log("< " + event.data)
   commandDict[args["command"]](args);
+}
+
+function send(str) {
+  socket.send(str);
+  console.log("> " + str);
 }
