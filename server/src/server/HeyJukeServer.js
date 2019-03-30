@@ -103,6 +103,12 @@ class HeyJukeServer {
         const AuthManager = require('./auth/AuthManager');
         const {createLocalDb} = require('./local/LocalDb');
         const LocalDbCollection = require('./local/LocalDbCollection');
+        const Beacon = require('./beacon/Beacon');
+
+        this.beacon = new Beacon(this.webServerPort, "HeyJuke Test", "0.0.0.0");
+        await this.beacon.socketBind();
+        this.beacon.startTimer();
+
         expressApp.use(require('morgan')(process.env.NODE_ENV === "production" ? 'common' : 'dev'));
         expressApp.use(express.json());
 
@@ -172,7 +178,7 @@ class HeyJukeServer {
         } catch (error) {
             await this._stopWebServer();
             await this._stopWebSocketServer();
-            throw error;
+            console.log(error)
         }
     }
 

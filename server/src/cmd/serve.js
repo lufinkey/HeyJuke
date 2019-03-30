@@ -13,7 +13,11 @@ exports.builder = {
 
 exports.handler = function(argv) {
     const HJS = require('../server/HeyJukeServer');
-    new HJS(argv).start();
+    try {
+        new HJS(argv).start();
+    } catch (e) {
+        console.log(e)
+    }
 
     console.log("Done.")
 };
