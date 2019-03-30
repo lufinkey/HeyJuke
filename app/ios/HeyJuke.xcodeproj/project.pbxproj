@@ -390,6 +390,13 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = UdpSockets;
 		};
+		A56831CE224FF35700ED0CDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5C54635FE74E4E28ADFB9E46 /* RNGestureHandler.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B5C32A36220C603B000FFB8D;
+			remoteInfo = "RNGestureHandler-tvOS";
+		};
 		A585576222016BA90000B950 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0206B2746D6D420DAFB4E021 /* SQLite.xcodeproj */;
@@ -804,8 +811,8 @@
 			isa = PBXGroup;
 			children = (
 				13B07FAE1A68108700A75B9A /* HeyJuke */,
-				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* HeyJukeTests */,
+				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				AD91DE8AC41F402BBE14A84E /* Resources */,
@@ -831,6 +838,7 @@
 			isa = PBXGroup;
 			children = (
 				A0960F6021C6568C0064DDC5 /* libRNGestureHandler.a */,
+				A56831CF224FF35700ED0CDD /* libRNGestureHandler-tvOS.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1518,6 +1526,13 @@
 			fileType = archive.ar;
 			path = libUdpSockets.a;
 			remoteRef = A553B0CE224FDCC3004C373D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		A56831CF224FF35700ED0CDD /* libRNGestureHandler-tvOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libRNGestureHandler-tvOS.a";
+			remoteRef = A56831CE224FF35700ED0CDD /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		A585576322016BA90000B950 /* libSQLite.a */ = {
