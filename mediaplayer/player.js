@@ -1,22 +1,38 @@
 const WebSocket = require("ws")
+const BandcampAPI = require("bandcamp-api")
 var audio = new Audio();
+var bandcamp = new BandcampAPI();
 
 const commandDict = {
-  "play-song": PlaySong,
+  "play-song": playSong,
   // "playPlaylist": PlayPlaylist,
   // "playAlbum": PlayAlbum,
-  "stop": audio.pause,
-  "continue": audio.play
+  "stop": stop,
+  "continue": resume
 }
-const socket = new WebSocket('us://localhost:8086');
 
+var socket = new WebSocket('us://localhost:8086');
+
+var connectAttempts = 0
+
+socket.onerror = () => {
+  console.log("error " + connectAttempts);
+}
 
 socket.onopen = () => socket.send('event connection opened')
 
-function PlaySong(media, path){
-  switch(media){
+async function playSong(args){
+  switch(args["media"]){
     case 'local':
-      audio.src = path;
+      audio.src = args["uri"];
+      audio.play();
+      socket.send("playback started");
+      break;
+    case 'bandcamp':
+      console.log(args)
+      const result = await bandcamp.getItemFromURL(args["uri"]);
+      console.log(result);
+      audio.src = result.audioURL;
       audio.play();
       socket.send("playback started");
       break;
@@ -25,15 +41,17 @@ function PlaySong(media, path){
   }
 }
 
+async function stop(args){
+  audio.pause();
+  socket.send("playback paused")
+}
+
+async function resume(args){
+  audio.play();
+  socket.send("playback resumed")
+}
+
 socket.onmessage = (event) => {
   var args = JSON.parse(event.data)
-  switch(args[0]){
-    case 'command':
-      commandDict[args[1]](args[2],args[3]);
-      break;
-    case 'event':
-      break;
-    default:
-      console.log('Invalid Message')
-  }
+  commandDict[args["command"]](args);
 }
