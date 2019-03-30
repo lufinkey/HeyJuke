@@ -13,7 +13,8 @@ Capability: localSearch
 {
   "songs": [
     {
-      "uri": "local://something/something.mp3",
+      "uri": "file://something/something.mp3",
+      "score": 0.353,
       "id3": {
         "title": "Something",
         "artist": "Joe",

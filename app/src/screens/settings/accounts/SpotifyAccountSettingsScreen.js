@@ -65,7 +65,7 @@ export default class SpotifyAccountSettingsScreen extends PureComponent<Props,St
 			this.sessionInterval = null;
 		}
 		const onFire = (async () => {
-			const auth = await Spotify.getAuth();
+			const auth = await Spotify.getSessionAsync();
 			const currentTime = (new Date()).getTime();
 			this.setState({
 				sessionExpireSeconds: Math.floor((auth.expireTime - currentTime) / 1000.0)
@@ -100,7 +100,7 @@ export default class SpotifyAccountSettingsScreen extends PureComponent<Props,St
 	didPressLogout = () => {
 		SpotifyProvider.logout().then(() => {
 			this.setState({
-				loggedIn: SpotifyProvider.isLoggedIn
+				loggedIn: false
 			});
 			this.stopSessionTimer();
 		}).catch((error) => {

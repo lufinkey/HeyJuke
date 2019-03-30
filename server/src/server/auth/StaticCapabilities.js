@@ -7,7 +7,7 @@ class StaticCapabilities {
     async has(capability) {
         // This specific capabilities implementation doesn't require async, but
         // others in the future may.
-        return Promise.resolve(this._capabilities.hasOwnProperty(capability))
+        return Promise.resolve(this._capabilities.has(capability))
     }
 }
 

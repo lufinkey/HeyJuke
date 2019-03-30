@@ -17,6 +17,8 @@ import {
 	Text
 } from '../components/theme';
 
+const SpotifyCredentials = require('../../credentials/Spotify.json');
+
 
 type Props = {
 	navigation: any
@@ -43,9 +45,7 @@ export default class InitialScreen extends PureComponent<Props,State> {
 			return await Spotify.isLoggedInAsync();
 		}
 		else {
-			// TODO initialize Spotify
-			await sleep(100);
-			return false;
+			return await Spotify.initialize(SpotifyCredentials);
 		}
 	}
 
@@ -69,7 +69,7 @@ export default class InitialScreen extends PureComponent<Props,State> {
 				<View style={styles.topArea}>
 				</View>
 				<View style={styles.centerArea}>
-					<Image source={require('../../assets/logo.png')} style={styles.logo} resizeMode={'contain'}/>
+					<Text>Hey, Juke</Text>
 				</View>
 				<View style={styles.bottomArea}>
 					<ActivityIndicator animating={true} size={'small'} style={styles.loadIndicator}/>
