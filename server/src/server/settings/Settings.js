@@ -7,6 +7,10 @@ const ENV_REPLACEMENT_PATTERN = /%(.+)%/;
 const SETTINGS_DEFAULT_SEARCH_PATH = "/etc/heyjuke.json;%HOME%/heyjuke.json;./heyjuke.json;./heyjuke.app.json";
 const SETTINGS_DEFAULT_AUTOSAVE_PATH = "./heyjuke.app.json";
 
+const defaults = {
+
+};
+
 function performEnvReplacement(s) {
     return s.replace(ENV_REPLACEMENT_PATTERN, (match, env) => {
         if (process.env.hasOwnProperty(env))

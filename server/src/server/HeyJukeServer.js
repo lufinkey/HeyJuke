@@ -98,6 +98,7 @@ class HeyJukeServer {
         const argon = require('argon2');
         const Capability = require('./auth/StaticCapabilities');
         const StaticPasswordAuthenticator = require('./auth/StaticPasswordAuthenticator');
+        const AnonymousAuthenticator = require('./auth/AnonymousAuthenticator');
         const Container = require('./auth/AuthSessionContainer');
         const AuthManager = require('./auth/AuthManager');
         const {createLocalDb} = require('./local/LocalDb');
@@ -128,9 +129,13 @@ class HeyJukeServer {
                     "password": new StaticPasswordAuthenticator(
                         await argon.hash('test'),
                         authedCapability
+                    ),
+                    "anonymous": new AnonymousAuthenticator(
+                        unauthedCapability
                     )
                 }),
             session));
+
         expressApp.use('/local', require('./local/Routes')(
             session, local
         ));
