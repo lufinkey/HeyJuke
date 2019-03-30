@@ -26,6 +26,13 @@ class HeyJukeServer {
         return this._options.webSocketPort || WEB_SOCKET_PORT;
     }
 
+    async _loadSettings() {
+        const Settings = require('./settings/Settings');
+
+        this.settings = new Settings();
+        await this.settings.resolve();
+    }
+
     async _startWebSocketServer() {
         if (this._webSocketServer) {
             throw new Error("web socket server has already started");
@@ -154,6 +161,7 @@ class HeyJukeServer {
 
     async start() {
         try {
+            await this._loadSettings();
             await this._startWebSocketServer();
             await this._startWebServer();
         } catch (error) {
