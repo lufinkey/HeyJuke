@@ -4,20 +4,20 @@
 3. Communicate to Electron from the Server
 
 ```
-command play-song [media] [path]
+{"command": "play-song", "source":[media], "uri":[path]}
 ```
 Start the song at the specified path from the specified medium. Available media options are: 
-```local``` where the path is a file path to a audio file on the local machine,
-```spotify``` where the path is a Spotify UID,
-```youtube``` where the path is a YouTube URL, and
-```bandcamp``` where the path is a BandCamp URL.
+```local``` where the uri is a file path to a audio file on the local machine,
+```spotify``` where the uri is a Spotify UID,
+```youtube``` where the uri is a YouTube URL, and
+```bandcamp``` where the uri is a BandCamp URL.
 
 ```
-command stop
+{"command": "stop"}
 ```
 Stops whatever is currently playing.
 
 ```
-command continue
+{"command": "continue"}
 ```
 Resumes or restarts playback of current song.

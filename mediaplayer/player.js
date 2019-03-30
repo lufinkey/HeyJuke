@@ -8,15 +8,21 @@ const commandDict = {
   "stop": audio.pause,
   "continue": audio.play
 }
-const socket = new WebSocket('us://localhost:8086');
 
+var socket = new WebSocket('us://localhost:8086');
+
+var connectAttempts = 0
+
+socket.onerror = () => {
+  console.log("error " + connectAttempts);
+}
 
 socket.onopen = () => socket.send('event connection opened')
 
-function PlaySong(media, path){
-  switch(media){
+function PlaySong(args){
+  switch(args["media"]){
     case 'local':
-      audio.src = path;
+      audio.src = args["uri"];
       audio.play();
       socket.send("playback started");
       break;
@@ -27,13 +33,5 @@ function PlaySong(media, path){
 
 socket.onmessage = (event) => {
   var args = JSON.parse(event.data)
-  switch(args[0]){
-    case 'command':
-      commandDict[args[1]](args[2],args[3]);
-      break;
-    case 'event':
-      break;
-    default:
-      console.log('Invalid Message')
-  }
+  commandDict[args[command]](args);
 }
