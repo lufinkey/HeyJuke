@@ -1,9 +1,15 @@
 
 import BandcampProvider from './BandcampProvider';
 import SpotifyProvider from './SpotifyProvider';
-import { MediaProvider } from './types';
+import type { SpotifyUserLibraryResumeId } from './SpotifyProvider';
+import {
+	MediaItem
+} from '../types';
+import {
+	MediaProvider
+} from '../types';
 
-type MediaProviderName = 'bandcamp' | 'spotify';
+export type MediaProviderName = 'bandcamp' | 'spotify';
 
 export const getMediaProvider = (name: MediaProviderName): MediaProvider => {
 	switch(name) {
@@ -12,20 +18,20 @@ export const getMediaProvider = (name: MediaProviderName): MediaProvider => {
 		case 'spotify':
 			return SpotifyProvider;
 		default:
-			throw new Error("invalid media provider");
+			throw new Error(`invalid provider name ${name}`);
 	}
-}
+};
 
-export const createMediaItem = (data: Object): MediaItem => {
-	const providerName = data.provider;
-	if(!(typeof providerName === 'string')) {
-		throw new Error(`No provider for media item with name ${data.name}`);
-	}
+export const createMediaItem = (data: Object, providerName: MediaProviderName): MediaItem => {
 	const provider = getMediaProvider(providerName);
 	return provider.createMediaItem(data);
-}
+};
 
 export {
 	BandcampProvider,
 	SpotifyProvider
+};
+
+export type {
+	SpotifyUserLibraryResumeId
 };

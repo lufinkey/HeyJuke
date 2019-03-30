@@ -20,11 +20,11 @@ import {
 	Text
 } from '../../../components/theme';
 
-import SpotifyProvider from '../../../providers/SpotifyProvider';
+import SpotifyProvider from '../../../library/providers/SpotifyProvider';
 import MediaItemRow from '../../../components/MediaItemRow';
 import {
 	MediaItem
-} from '../../../providers/types';
+} from '../../../library/types';
 
 
 type Props = {
@@ -185,7 +185,7 @@ export default class SpotifyAllSearchResultsView extends PureComponent<Props,Sta
 
 	render() {
 		const sections = this.state.sections;
-		if(sections.length == 0) {
+		if(sections.length === 0) {
 			return (
 				<View style={styles.container}>
 					<Text>No results found</Text>

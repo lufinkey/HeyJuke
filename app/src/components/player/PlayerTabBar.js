@@ -29,7 +29,7 @@ import PlayerView from './PlayerView';
 import type {
 	PlaybackState,
 	PlaybackMetadata
-} from '../../providers/types';
+} from '../../library/types';
 
 
 const TABBAR_HEIGHT = 50;

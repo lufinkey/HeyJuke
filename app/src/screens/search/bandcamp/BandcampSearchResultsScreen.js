@@ -16,13 +16,13 @@ import {
 	Text
 } from '../../../components/theme';
 
-import BandcampProvider from '../../../providers/BandcampProvider';
+import BandcampProvider from '../../../library/providers/BandcampProvider';
 import MediaItemRow from '../../../components/MediaItemRow';
 import LoadableList from '../../../components/LoadableList';
 import {
 	MediaItem,
 	AsyncMediaItemGenerator
-} from '../../../providers/types';
+} from '../../../library/types';
 
 
 type Props = {

@@ -5,11 +5,13 @@ import {
 	ActivityIndicator,
 	Alert,
 	Image,
-	SafeAreaView,
 	StyleSheet,
 	TouchableOpacity,
 	View
 } from 'react-native';
+import {
+	SafeAreaView
+} from 'react-navigation';
 import SearchBox from 'react-native-search-box';
 import Icon from 'react-native-vector-icons/Ionicons';
 

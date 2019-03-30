@@ -53,10 +53,10 @@ export class PlaylistItem extends TrackCollectionItem {
 		if(!(item instanceof PlaylistItem)) {
 			return false;
 		}
-		if(this.track.uri === item.track.uri && this.addedAt === item.addedAt && this.addedBy?.uri === item.addedBy?.uri) {
-			return true;
+		if(this.track.uri !== item.track.uri || this.addedAt !== item.addedAt || this.addedBy?.uri !== item.addedBy?.uri) {
+			return false;
 		}
-		return false;
+		return true;
 	}
 }
 

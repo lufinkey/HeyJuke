@@ -11,7 +11,6 @@ import {
 	View
 } from 'react-native';
 import Spotify from 'rn-spotify-sdk';
-import { sleep } from '../util/misc';
 
 import {
 	Text
@@ -30,6 +29,7 @@ type State = {
 
 
 export default class InitialScreen extends PureComponent<Props,State> {
+	loaded: boolean = false;
 	loadState = 'preparing';
 
 	constructor(props: Props) {
@@ -49,14 +49,17 @@ export default class InitialScreen extends PureComponent<Props,State> {
 		}
 	}
 
-	async load() {
-		this.loadState = 'spotify';
-		await this.initializeSpotifyIfNeeded();
+	async loadIfNeeded() {
+		if(!this.loaded) {
+			this.loadState = 'spotify';
+			await this.initializeSpotifyIfNeeded();
+		}
 		this.loadState = 'finished';
+		this.loaded = true;
 	}
 
 	componentDidMount() {
-		this.load().then(() => {
+		this.loadIfNeeded().then(() => {
 			this.goToHomeScreen();
 		}).catch((error) => {
 			Alert.alert("Error while loading "+this.loadState, error.message);

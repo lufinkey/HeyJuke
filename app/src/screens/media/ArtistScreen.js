@@ -23,7 +23,7 @@ import MediaItemRow from '../../components/MediaItemRow';
 import {
 	Artist,
 	Album
-} from '../../providers/types';
+} from '../../library/types';
 
 
 type Props = {

@@ -39,7 +39,8 @@ type Props = {
 		item: Item,
 		index: number,
 		section: Section }) => any,
-	style?: ?Object | ?Array<Object>
+	style?: ?Object | ?Array<Object>,
+	extraData?: Object
 }
 
 type State = {
@@ -77,7 +78,7 @@ export default class TableView extends PureComponent<Props,State> {
 			<View style={styles.sectionHeader}>
 				<Text style={styles.sectionTitle}>{section.title}</Text>
 			</View>
-		)
+		);
 	}
 
 	renderItem = ({ item, index, section }: {item: Item, index: number, section: Section}) => {
@@ -116,8 +117,7 @@ export default class TableView extends PureComponent<Props,State> {
 				{...this.props}
 				style={this.state.style}
 				renderItem={this.renderItem}
-				renderSectionHeader={this.renderSectionHeader}
-				/>
+				renderSectionHeader={this.renderSectionHeader}/>
 		);
 	}
 }

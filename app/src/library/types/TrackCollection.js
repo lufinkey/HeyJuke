@@ -1,15 +1,26 @@
 // @flow
 
-import MediaItem from './MediaItem';
 import { MediaProvider } from './MediaProvider';
+import MediaItem from './MediaItem';
+import type {
+	MediaItemData
+} from "./MediaItem";
 import type { ContinuousAsyncGenerator } from './Generators';
 import Track from './Track';
+import type {
+	TrackData
+} from './Track';
 import { parseTrackCollectionItems } from './parse';
-import { cloneContinuousAsyncGenerator, sleep } from '../../util/misc';
 import AsyncList from '../../util/AsyncList';
 
 
 export type AsyncTrackCollectionItemGenerator = ContinuousAsyncGenerator<Array<TrackCollectionItem>>
+
+export type TrackCollectionItemData = {
+	collectionURI: string,
+	indexNum: number,
+	track: TrackData
+}
 
 export class TrackCollectionItem {
 	track: Track;
@@ -20,8 +31,7 @@ export class TrackCollectionItem {
 			this.track = data.track;
 		}
 		else {
-			const track = new Track(data.track, provider);
-			this.track = track;
+			this.track = new Track(data.track, provider);
 		}
 		this.context = context;
 	}
@@ -41,7 +51,16 @@ export class TrackCollectionItem {
 	matchesItem(item: TrackCollectionItem) {
 		return false;
 	}
+
+	toData(): TrackCollectionItemData {
+		return {
+			collectionURI: this.context.uri,
+			indexNum: (this.indexInContext: any),
+			track: this.track.toData()
+		};
+	}
 }
+
 
 export type TrackCollectionOptions = {
 	itemType?: any,
@@ -49,13 +68,25 @@ export type TrackCollectionOptions = {
 }
 
 
+export type TrackCollectionData = MediaItemData & {
+	uri: string,
+	itemCount: ?number,
+	tracks?: {
+		offset: number,
+		items: Array<TrackCollectionItemData>,
+		total: ?number
+	}
+}
+
+
 export default class TrackCollection extends MediaItem {
 	static Item = TrackCollectionItem;
+
+	+uri: string;
 
 	_items: ?Array<TrackCollectionItem> = null;
 	_asyncItems: ?AsyncList<TrackCollectionItem> = null;
 
-	_trackGeneratorDone: boolean = false;
 	_options: TrackCollectionOptions;
 
 	constructor(data: Object, provider: MediaProvider, options: TrackCollectionOptions = {}) {
@@ -99,9 +130,7 @@ export default class TrackCollection extends MediaItem {
 			this._asyncItems = new AsyncList({
 				initialItems: items || [],
 				initialItemsOffset: offset || 0,
-				loader: async (index: number, count: number): Promise<Array<TrackCollectionItem>> => {
-					return parseTrackCollectionItems(await asyncLoad.loader(index, count), this.provider, this, this._options);
-				},
+				loader: this._loadItems.bind(this),
 				// TODO send events when overwriting will occur
 				// TODO or mark certain sections as ready for overwrite?
 				noOverwrite: true,
@@ -116,6 +145,11 @@ export default class TrackCollection extends MediaItem {
 	}
 
 
+	async _loadItems(index: number, count: number, list: AsyncList<TrackCollectionItem>): Promise<Array<TrackCollectionItem>> {
+		return parseTrackCollectionItems(await this.data.asyncLoad.loader(index, count, this), this.provider, this, this._options);
+	}
+
+
 	get items(): ?Array<?TrackCollectionItem> {
 		if(this._asyncItems) {
 			return this._asyncItems.items;
@@ -127,10 +161,7 @@ export default class TrackCollection extends MediaItem {
 	}
 
 	get itemCount(): ?number {
-		if(this._asyncItems) {
-			return this._asyncItems.items.length;
-		}
-		else if(this._items) {
+		if(this._items) {
 			return this._items.length;
 		}
 		const data = this.data;
@@ -142,6 +173,12 @@ export default class TrackCollection extends MediaItem {
 		}
 		else if(data.total_tracks != null) {
 			return data.total_tracks;
+		}
+		else if(data.asyncLoad?.length != null) {
+			return data.asyncLoad.length;
+		}
+		else if(data.tracks?.total != null) {
+			return data.tracks.total;
 		}
 		return null;
 	}
@@ -226,15 +263,14 @@ export default class TrackCollection extends MediaItem {
 		if(!asyncItems) {
 			return { result: (this._items || []) };
 		}
-		const data = this.data;
 		const chunkSize = asyncItems.chunkSize;
 		let index = 0;
 		let chunkIndex = 0;
-		while(chunkIndex < asyncItems.chunkCount) {
+		while(true) {
 			try {
 				await asyncItems.loadChunkIndex(chunkIndex);
 				const yieldedItems = asyncItems.items.slice(index, Math.min(index+chunkSize, asyncItems.items.length));
-				if(chunkIndex >= (asyncItems.chunkCount-1)) {
+				if(yieldedItems.length < chunkSize) {
 					return { result: yieldedItems };
 				}
 				else {
@@ -247,7 +283,6 @@ export default class TrackCollection extends MediaItem {
 				yield { error };
 			}
 		}
-		return { result: [] };
 	}
 
 
@@ -269,5 +304,46 @@ export default class TrackCollection extends MediaItem {
 			return [];
 		}
 		return items.map((func: any));
+	}
+
+	toData(options: {includeTracks?: boolean | {startIndex:number, endIndex:number}} = {}): TrackCollectionData {
+		let tracks = null;
+		if(options.includeTracks) {
+			const items = this.items;
+			if(items) {
+				if (typeof options.includeTracks === 'object') {
+					tracks = {
+						offset: options.includeTracks.startIndex,
+						items: (this.items || []).slice(options.includeTracks.startIndex, options.includeTracks.endIndex).map((item: ?TrackCollectionItem) => {
+							if(!item) {
+								return item;
+							}
+							return item.toData();
+						}),
+						total: this.itemCount
+					};
+				}
+				else {
+					tracks = {
+						offset: 0,
+						items: items.map((item: ?TrackCollectionItem) => {
+							if(!item) {
+								return item;
+							}
+							return item.toData();
+						}),
+						total: this.itemCount
+					}
+				}
+			}
+		}
+		options.includeTracks ? ((typeof options.includeTracks === 'object') ? (
+			(this.items || []).slice(options.includeTracks.startIndex, options.includeTracks.endIndex)
+		) : this.items) : null
+		const data = (super.toData(): any);
+		return Object.assign(data, {
+			itemCount: this.itemCount,
+			tracks: tracks
+		});
 	}
 }

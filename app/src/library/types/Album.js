@@ -1,18 +1,17 @@
 // @flow
 
+import { MediaProvider } from './MediaProvider';
 import TrackCollection, {
 	TrackCollectionItem
 } from './TrackCollection';
-import type { TrackCollectionOptions } from './TrackCollection';
-import { MediaProvider } from './MediaProvider';
+import type {
+	TrackCollectionData
+} from './TrackCollection';
 
-import Track from './Track';
 import Artist from './Artist';
 
 import {
-	parseAlbum,
 	parseArtists,
-	parseTrackCollectionItems
 } from './parse';
 
 
@@ -66,6 +65,16 @@ export class AlbumItem extends TrackCollectionItem {
 }
 
 
+export type AlbumData = TrackCollectionData & {
+	artists: Array<{
+		uri: string,
+		provider: string,
+		type: string,
+		name: string
+	}>
+}
+
+
 export default class Album extends TrackCollection {
 	static Item = AlbumItem;
 
@@ -104,5 +113,17 @@ export default class Album extends TrackCollection {
 			return true;
 		}
 		return false;
+	}
+
+	toData(options: {includeTracks?: boolean | {startIndex:number, endIndex:number}} = {}): AlbumData {
+		const data = (super.toData(): any);
+		return Object.assign(data, {
+			artists: this.artists ? this.artists.map((artist: Artist) => ({
+				type: artist.type,
+				uri: artist.uri,
+				provider: artist.provider.name,
+				name: artist.name
+			})) : null
+		});
 	}
 }

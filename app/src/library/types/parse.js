@@ -57,6 +57,11 @@ export const parseArtists = (data: any, provider: MediaProvider): ?Array<Artist>
 
 
 export const parseTrackCollectionItems = (items: Array<any>, provider: MediaProvider, context: TrackCollection, options: TrackCollectionOptions={}): Array<TrackCollectionItem> => {
+	for(let i=0; i<items.length; i++) {
+		if(!items[i]) {
+			delete items[i];
+		}
+	}
 	return items.map((itemData) => {
 		if(itemData.type === 'track') {
 			itemData = {track:itemData};

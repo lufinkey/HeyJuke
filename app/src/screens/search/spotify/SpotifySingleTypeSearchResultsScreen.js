@@ -16,13 +16,13 @@ import {
 	Text
 } from '../../../components/theme';
 
-import SpotifyProvider from '../../../providers/SpotifyProvider';
+import SpotifyProvider from '../../../library/providers/SpotifyProvider';
 import MediaItemRow from '../../../components/MediaItemRow';
 import LoadableList from '../../../components/LoadableList';
 import {
 	MediaItem,
 	AsyncMediaItemGenerator
-} from '../../../providers/types';
+} from '../../../library/types';
 import {
 	capitalizeString,
 	cloneContinuousAsyncGenerator
