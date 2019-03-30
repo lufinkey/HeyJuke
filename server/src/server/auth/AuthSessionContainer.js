@@ -5,15 +5,16 @@ function generateAuthToken() {
 }
 
 class AuthSessionContainer {
-    constructor() {
-        this._auths = {};
+    constructor(deflt) {
+        this._auths = new Map();
+        this._defaultCapability = deflt;
     }
 
     _createUnusedAuthToken() {
         let token;
         do {
             token = generateAuthToken()
-        } while (this._auths.hasOwnProperty(token));
+        } while (this._auths.has(token));
         return token
     }
 
@@ -23,7 +24,7 @@ class AuthSessionContainer {
     createAuthorizationToken(capabilities) {
         const token = this._createUnusedAuthToken();
 
-        this._auths[token] = capabilities;
+        this._auths.set(token, capabilities);
         return token
     }
 
@@ -31,10 +32,10 @@ class AuthSessionContainer {
      * Invalidate a token. Returns whether or not the token was previously valid.
      */
     invalidateAuthorization(token) {
-        if (!this._auths.hasOwnProperty(token))
+        if (!this._auths.has(token))
             return false;
 
-        delete this._auths[token];
+        this._auths.delete(token);
         return true
     }
 
@@ -42,10 +43,17 @@ class AuthSessionContainer {
      * Returns the capabilites for a passed token.
      */
     getCapabilitiesForAuthorization(token) {
-        const capabilities = this._auths[token];
+        const capabilities = this._auths.get(token);
         if (capabilities === undefined)
             return null;
         return capabilities
+    }
+
+    getCapabilitiesForRequest(req) {
+        if (!req.headers.hasOwnProperty("x-auth-token"))
+            return this._defaultCapability;
+
+        return this.getCapabilitiesForAuthorization(req.headers["x-auth-token"]);
     }
 }
 
