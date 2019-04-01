@@ -2,6 +2,7 @@ const WebSocket = require("ws")
 const BandcampAPI = require("bandcamp-api")
 var audio = new Audio();
 var bandcamp = new BandcampAPI();
+var currentMedia = "audio";
 
 const commandDict = {
   "play-song": playSong,
@@ -42,7 +43,7 @@ function onPlayerReady(event) {
 
 var done = false;
 function onPlayerStateChange(event) {
-  if (event.data == YT.PlayerState.PLAYING && !done) {
+  if (event.data == YT && !done) {
     setTimeout(stopVideo, 6000);
     done = true;
   }
@@ -56,11 +57,13 @@ function stopVideo() {
 async function playSong(args){
   switch(args["media"]){
     case 'local':
+      currentMedia = "audio"
       audio.src = args["uri"];
       audio.play();
       send("playback started");
       break;
     case 'bandcamp':
+      currentMedia = "audio"
       console.log(args)
       const result = await bandcamp.getItemFromURL(args["uri"]);
       console.log(result);
@@ -69,8 +72,10 @@ async function playSong(args){
       send("playback started");
       break;
     case 'youtube':
-      player.loadVideoById(args["uri"], "small")
-      player.playVideo();
+      currentMedia = args["media"];
+      ytplayer.loadVideoById(args["uri"], 0, "small")
+      ytplayer.playVideo();
+      send("playback started");
       break;
     default:
       console.log('Invalid Media')
@@ -78,12 +83,18 @@ async function playSong(args){
 }
 
 async function stop(args){
-  audio.pause();
+  if(currentMedia == "audio")
+    audio.pause();
+  else if (currentMedia == "youtube")
+    ytplayer.pauseVideo();
   send("playback paused")
 }
 
 async function resume(args){
-  audio.play();
+  if(currentMedia == "audio")
+    audio.play();
+  else if (currentMedia == "youtube")
+    ytplayer.playVideo();
   send("playback resumed")
 }
 
