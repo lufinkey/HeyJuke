@@ -1,12 +1,14 @@
 
 class QueueEntry {
-    constructor(auth, uri) {
-        this.auth = auth;
+    constructor(owner, source, uri) {
+        this.owner = owner;
         this.uri = uri;
+        this.source = source;
     }
 
-    canAdminstrate(token, capabilities) {
-
+    async canAdminstrate(token, capabilities) {
+        if (this.owner === token) return true;
+        return await capabilities.has("queue.delete");
     }
 }
 

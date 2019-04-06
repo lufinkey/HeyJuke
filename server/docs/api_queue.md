@@ -12,9 +12,16 @@ Capability: queue.list
 #### Response
 ```
 {
+    "now_playing": {
+        "uri": "file://xyz",
+        "source": "local",
+        "owner": "<token>"
+    },
+    "is_playing": "true",
     "queue": [
         {
             "uri": "file://xyz",
+            "source": "local",
             "owner": "<token>"
         },
         ...
@@ -22,7 +29,9 @@ Capability: queue.list
 }
 ```
 
-Next song to be played will be at the front of the queue.
+Next song to be played will be at the front of the queue. `now_playing` may be 
+undefined / not supplied in the case that a song was queued while it was paused, yet not
+started.
 
 ## POST /queue
 
@@ -34,6 +43,7 @@ Capability: queue.put
 ```
 {
     "uri": "file:///test"
+    "source": "local",
 }
 ```
 
@@ -46,3 +56,15 @@ Capability: Either token sent created the item, or queue.delete
 #### Response
 
 200 if exists, 404 if does not exist. 403 if permissions are missing.
+
+## POST /queue/pause
+
+Pauses playback of the queue.
+
+Capability: queue.pause
+
+## POST /queue/play
+
+Resumes playback of the queue.
+
+Capability: queue.play

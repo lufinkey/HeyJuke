@@ -113,10 +113,15 @@ class HeyJukeServer {
         expressApp.use(express.json());
 
         const unauthSet = new Set();
+        unauthSet.add("queue.list");
+        unauthSet.add("queue.put");
         unauthSet.add("localSearch");
         const unauthedCapability = new Capability(unauthSet);
 
         const authSet = new Set(unauthSet);
+        authSet.add("queue.delete");
+        authSet.add("queue.unpause");
+        authSet.add("queue.pause");
         const authedCapability = new Capability(authSet);
 
         const session = new Container(unauthedCapability);
@@ -145,6 +150,13 @@ class HeyJukeServer {
         expressApp.use('/local', require('./local/Routes')(
             session, local
         ));
+
+        const Remote = require('./queue/Remote');
+        const Queue = require('./queue/Queue');
+        const remote = new Remote(this.webSocketPort);
+        const queue = new Queue(remote);
+
+        expressApp.use('/queue', require('./queue/Routes')(session, queue));
 
         expressApp.use(require('./s15n/ErrorHandler'));
         let webServer = null;

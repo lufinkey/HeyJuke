@@ -1,5 +1,5 @@
 const {readFile, writeFile} = require('fs');
-const {join} = require('path');
+const {join, resolve} = require('path');
 const {LocalDbUpdate} = require('./LocalDbUpdate');
 
 const elasticlunr = require('elasticlunr');
@@ -10,7 +10,7 @@ elasticlunr.clearStopWords();
 class LocalDb {
     constructor(index, rootPath, dbPath) {
         this.index = index;
-        this.rootPath = rootPath;
+        this.rootPath = resolve(rootPath);
         this.dbPath = dbPath;
         this.dirty = false;
 
