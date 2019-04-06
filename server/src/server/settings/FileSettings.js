@@ -15,7 +15,6 @@ class FileSettings extends EventEmitter {
             fs.readFile(this.path, (err, data) => {
                 if (err != null) {
                     this.close();
-                    console.log(err); // TODO: This is a pretty common thing, make it nicer logging wise
                     this.state = {};
                 } else {
                     this.state = JSON.parse(data);

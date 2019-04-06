@@ -1,0 +1,21 @@
+{
+    "webServerPort": 8085,
+    "webSocketPort": 8086,
+    "server_id": "Test Server",
+    "main_password_hash": "$argon2i$v=19$m=4096,t=3,p=1$cbAhD3vmsXamKeAq7d741g$7vcg1K8x2u+iYotD2CpgPCgVB5JaK7mxVN9XWeQfLDg",
+    "permissions": {
+        "unauthenticated": [
+            "queue.list",
+            "queue.put",
+            "localSearch"
+        ],
+        "authenticated": [
+            "queue.delete",
+            "queue.unpause",
+            "queue.pause"
+        ]
+    },
+    "local_sources": {
+        "test": "./test_local"
+    }
+}
