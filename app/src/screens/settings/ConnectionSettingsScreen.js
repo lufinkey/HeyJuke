@@ -7,6 +7,7 @@ import {
 	FlatList,
 	StyleSheet,
 	Switch,
+	TouchableOpacity,
 	View
 } from 'react-native';
 
@@ -110,10 +111,17 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 
 	updateConnections = () => {
 		const connections = HeyJukeScanner.connections;
+		const currentConnection = HeyJukeClient.connection;
 		this.setState({
-			connections
+			connections,
+			currentConnection
 		});
 	};
+
+	onSelectConnection(connection: HeyJukeConnection) {
+		HeyJukeClient.connection = connection;
+		this.updateConnections();
+	}
 
 	extractItemKey = (item: HeyJukeConnection, index: number) => {
 		return `connection-${index}`;
@@ -121,16 +129,32 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 
 	renderConnection = ({ item, index}: {item: HeyJukeConnection, index: number}) => {
 		return (
-			<View style={styles.connectionRow}>
-				<Text>{item.name}</Text>
-				<Text>{item.address}:{item.port}</Text>
-			</View>
+			<TouchableOpacity style={styles.connectionRow} onPress={() => {this.onSelectConnection(item)}}>
+				<View style={styles.connectionDetails}>
+					<Text>{item.name}</Text>
+					<Text>{item.address}:{item.port}</Text>
+				</View>
+			</TouchableOpacity>
 		)
 	};
 
 	render() {
+		const currentConnection = this.state.currentConnection;
 		return (
 			<View style={styles.container}>
+				{(currentConnection) ? (
+					<View style={styles.connectionRow}>
+						<Text style={styles.connectedToText}>Connected To</Text>
+						<View style={styles.connectionDetails}>
+							<Text>{currentConnection.name}</Text>
+							<Text>{currentConnection.address}:{currentConnection.port}</Text>
+						</View>
+					</View>
+				) : (
+					<View style={styles.connectionRow}>
+						<Text style={styles.notConnectedText}>Not Connected</Text>
+					</View>
+				)}
 				<View style={styles.scanSwitchRow}>
 					<Text>Scan For Connections</Text>
 					<View style={styles.scanSwitchContainer}>
@@ -173,7 +197,22 @@ const styles = StyleSheet.create({
 		width: '100%'
 	},
 	connectionRow: {
+		height: 64,
 		paddingLeft: 10,
 		paddingRight: 10
+	},
+	connectionDetails: {
+		flexDirection: 'column'
+	},
+	connectedToText: {
+		color: 'green',
+		fontWeight: 'bold'
+	},
+	notConnectedText: {
+		alignSelf: 'center',
+		textAlign: 'center',
+		color: Theme.secondaryTextColor,
+		fontWeight: 'bold',
+		flex: 1
 	}
 });
