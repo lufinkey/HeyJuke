@@ -1,9 +1,10 @@
 
 class QueueEntry {
-    constructor(owner, source, uri) {
+    constructor(owner, source, uri, uid) {
         this.owner = owner;
-        this.uri = uri;
         this.source = source;
+        this.uri = uri;
+        this.uid = uid;
     }
 
     async canAdminstrate(token, capabilities) {

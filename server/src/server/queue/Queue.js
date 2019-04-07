@@ -28,13 +28,13 @@ class Queue {
         this.queue.push(item)
     }
 
-    find(uri) {
+    find(uid) {
         // Yay for magic numbers!
-        if (this.now_playing !== null && this.now_playing.uri === uri)
+        if (this.now_playing !== null && this.now_playing.uid === uid)
             return {index: -1, item: this.now_playing};
 
         for (let i = 0; i < this.queue.length; i++)
-            if (this.queue[i].uri === uri)
+            if (this.queue[i].uid === uid)
                 return {index: i, item: this.queue[i]};
 
         return null;
