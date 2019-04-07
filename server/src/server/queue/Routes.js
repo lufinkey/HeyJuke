@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const {BadRequest, Unauthorized} = require('../s15n/ApiError');
 const QueueEntry = require('./QueueEntry');
-
+const crypto = require('crypto')
 function generateAuthToken() {
     return crypto.randomBytes(21).toString('base64')
 }
