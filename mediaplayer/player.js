@@ -1,4 +1,3 @@
-const WebSocket = require("ws")
 const BandcampAPI = require("bandcamp-api")
 let audio = new Audio();
 let bandcamp = new BandcampAPI();
@@ -12,7 +11,8 @@ let status = {
 const commandDict = {
   "play-song": playSong,
   "stop": stop,
-  "continue": resume
+  "continue": resume,
+  "kill": kill
 };
 
 audio.onended = () => {
@@ -21,8 +21,7 @@ audio.onended = () => {
 }
 
 // websocket stuff
-
-var socket = new WebSocket('us://localhost:8086');
+var socket = new WebSocket('ws://localhost:8086');
 
 var connectAttempts = 0
 socket.onerror = () => {
@@ -33,11 +32,11 @@ socket.onopen = () => send(status)
 
 // youtube
 
-var ytplayer;
+let ytplayer;
 function onYouTubeIframeAPIReady() {
-  ytplayer = new YT.Player('player', {
-    height: '100',
-    width: '100',
+  ytplayer = new YT.Player('ytplayer', {
+    height: '300',
+    width: '300',
     events: {
       'onReady': onPlayerReady,
       'onStateChange': onPlayerStateChange
@@ -57,16 +56,38 @@ function onPlayerStateChange(event) {
   }
 }
 
+// spotify
+const playSpotify = ({
+  spotify_uri,
+  playerInstance: {
+    _options: {
+      getOAuthToken,
+      id
+    }
+  }
+}) => {
+  getOAuthToken(access_token => {
+    fetch(`https://api.spotify.com/v1/me/player/play?device_id=${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ uris: [spotify_uri] }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${access_token}`
+      },
+    });
+  });
+};
+
 // playing api stuff
 
-async function playSong(args){
-  switch(args["media"]){
+async function playSong(args) {
+  stop(args);
+  switch (args["media"]) {
     case 'local':
       currentMedia = "audio"
       audio.src = args["uri"];
       audio.play();
       status.status = "started"
-      send(status);
       break;
     case 'bandcamp':
       currentMedia = "audio"
@@ -76,42 +97,58 @@ async function playSong(args){
       audio.src = result.audioURL;
       audio.play();
       status.status = "started"
-      send(status);
       break;
     case 'youtube':
       currentMedia = args["media"];
       ytplayer.loadVideoByUrl(args["uri"], 0, "small")
       ytplayer.playVideo();
       status.status = "started"
-      send(status);
+      break;
+    case 'spotify':
+      currentMedia = args["media"];
+      playSpotify({
+        playerInstance: window.spotifyplayer,
+        spotify_uri: 'spotify:track:3Pt8XN6zWFmW2ShLna8Ttb'
+      });
+      status.status = "started"
       break;
     default:
-      console.log('Invalid Media')
+      console.log('Invalid Media');
+      status.status = "waiting";
   }
 }
 
-async function stop(args){
-  if(currentMedia == "audio")
+async function stop(args) {
+  if (currentMedia == "audio")
     audio.pause();
   else if (currentMedia == "youtube")
     ytplayer.pauseVideo();
+  else if (currentMedia == "spotify")
+    window.spotifyplayer.pause();
   status.status = "paused"
-  send(status);
 }
 
-async function resume(args){
-  if(currentMedia == "audio")
+async function resume(args) {
+  if (currentMedia == "audio")
     audio.play();
   else if (currentMedia == "youtube")
     ytplayer.playVideo();
+  else if (currentMedia == "spotify")
+    window.player.resume();
   status.status = "resumed"
-  send(status);
+}
+
+async function kill(args) {
+  window.close();
+  status.domain = "player";
+  status.status = "killed";
 }
 
 socket.onmessage = (event) => {
   var args = JSON.parse(event.data);
   console.log("< " + event.data)
   commandDict[args["command"]](args);
+  send(status);
 }
 
 function send(obj) {

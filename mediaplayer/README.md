@@ -32,6 +32,10 @@ Stops whatever is currently playing.
 {"command": "continue"}
 ```
 Resumes or restarts playback of current song.
+```
+{"command": "kill"}
+```
+Closes the mediaplayer.
 
 ## Events
 
@@ -52,5 +56,10 @@ The currently playing song has resumed from a paused location.
 
 ```
 {"domain":"playback","status": "started"}
+```
+The play-song command was successful.
+
+```
+{"domain":"player","status": "killed"}
 ```
 The play-song command was successful.

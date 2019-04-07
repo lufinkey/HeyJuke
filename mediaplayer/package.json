@@ -10,11 +10,9 @@
   "author": "",
   "license": "Zlib",
   "dependencies": {
-    "npm": "^6.7.0",
-    "ws": "^6.1.2",
     "bandcamp-api": "git+ssh://git@github.com:lufinkey/bandcamp-api.git"
   },
   "devDependencies": {
-    "electron": "^4.0.1"
+    "electron": "^4.1.4"
   }
 }
