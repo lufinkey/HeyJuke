@@ -4,7 +4,6 @@ import React, { PureComponent } from 'react';
 import {
 	ActivityIndicator,
 	Alert,
-	FlatList,
 	StyleSheet,
 	Switch,
 	TouchableOpacity,
@@ -15,6 +14,8 @@ import Theme from '../../Theme';
 import {
 	Text
 } from '../../components/theme';
+
+import TableView from '../../components/TableView';
 
 import HeyJukeScanner from '../../playback/HeyJukeScanner';
 import type { HeyJukeConnection } from '../../playback/HeyJukeScanner';
@@ -29,7 +30,8 @@ type State = {
 	preparingScanState: boolean,
 	scanning: boolean,
 	connections: Array<HeyJukeConnection>,
-	currentConnection: ?HeyJukeConnection
+	currentConnection: ?HeyJukeConnection,
+	sections: Array<any>
 }
 
 export default class ConnectionSettingsScreen extends PureComponent<Props,State> {
@@ -40,7 +42,8 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 			preparingScanState: false,
 			scanning: false,
 			connections: [],
-			currentConnection: null
+			currentConnection: null,
+			sections: []
 		};
 	}
 
@@ -48,11 +51,8 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 		HeyJukeScanner.addListener('connectionFound', this.onScannerConnectionFound);
 		HeyJukeScanner.addListener('connectionUpdated', this.onScannerConnectionUpdated);
 		HeyJukeScanner.addListener('connectionExpired', this.onScannerConnectionExpired);
-		this.setState({
-			scanning: HeyJukeScanner.scanning,
-			connections: HeyJukeScanner.connections,
-			currentConnection: HeyJukeClient.connection
-		});
+		this.updateConnections();
+		this.updateSections();
 	}
 
 	componentWillUnmount() {
@@ -64,11 +64,56 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 		});
 	}
 
+	updateSections() {
+		const sections = [
+			{
+				key: 'scan-settings',
+				data: [
+					{
+						key: 'scan-for-connections',
+						render: this.renderScanForConnections
+					}
+				]
+			},
+			{
+				key: 'current-connection',
+				title: "Current Connection"+(HeyJukeClient.connection ? "" : " (Not Connected)"),
+				data: [
+					{
+						key: 'current-connection',
+						connection: HeyJukeClient.connection
+					}
+				],
+				renderItem: this.renderCurrentConnection
+			}
+		].concat((HeyJukeScanner.scanning) ? (
+			{
+				key: 'connections',
+				title: "Connections",
+				data: HeyJukeScanner.connections.map((connection) => ({
+					key: `connection-${connection.address}:${connection.port}`,
+					connection: connection
+				})),
+				renderItem: this.renderConnection
+			}
+		) : []);
+		this.setState({
+			sections: sections
+		});
+	}
+
+	updateConnections = () => {
+		this.setState({
+			scanning: HeyJukeScanner.scanning,
+			connections: HeyJukeScanner.connections,
+			currentConnection: HeyJukeClient.connection
+		});
+	};
+
 	onScanToggle = (scanning: boolean) => {
 		this.setState({
 			preparingScanState: true
 		});
-		console.log("preparing scan state ", scanning);
 		if(scanning) {
 			HeyJukeScanner.start().then(() => {
 				this.setState({
@@ -99,83 +144,84 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 
 	onScannerConnectionFound = (connection: HeyJukeConnection) => {
 		this.updateConnections();
+		this.updateSections();
 	};
 
 	onScannerConnectionUpdated = (connection: HeyJukeConnection) => {
 		this.updateConnections();
+		this.updateSections();
 	};
 
 	onScannerConnectionExpired = (connection: HeyJukeConnection) => {
 		this.updateConnections();
-	};
-
-	updateConnections = () => {
-		const connections = HeyJukeScanner.connections;
-		const currentConnection = HeyJukeClient.connection;
-		this.setState({
-			connections,
-			currentConnection
-		});
+		this.updateSections();
 	};
 
 	onSelectConnection(connection: HeyJukeConnection) {
 		HeyJukeClient.setConnection(connection).then(() => {
 			this.updateConnections();
+			this.updateSections();
 		}).catch((error) => {
 			Alert.alert("Error", error.message);
 			this.updateConnections();
+			this.updateSections();
 		});
 		this.updateConnections();
+		this.updateSections();
 	}
 
-	extractItemKey = (item: HeyJukeConnection, index: number) => {
-		return `connection-${index}`;
+	renderScanForConnections = () => {
+		return (
+			<View style={styles.scanSwitchRow}>
+				<Text>Scan For Connections</Text>
+				<View style={styles.scanSwitchContainer}>
+					{(this.state.preparingScanState) ? (
+						<ActivityIndicator animating={true} size={'small'}/>
+					) : (
+						<Switch value={this.state.scanning} onValueChange={this.onScanToggle}/>
+					)}
+				</View>
+			</View>
+		);
 	};
 
-	renderConnection = ({ item, index}: {item: HeyJukeConnection, index: number}) => {
+	renderCurrentConnection = ({ item, index }: {item: {connection: ?HeyJukeConnection}, index: number}) => {
+		const { connection } = item;
+		if(connection != null) {
+			return (
+				<View style={styles.connectionRow}>
+					<Text style={styles.connectedToText}>Connected To</Text>
+					<View style={styles.connectionDetails}>
+						<Text>{connection.name}</Text>
+						<Text>{connection.address}:{connection.port}</Text>
+					</View>
+				</View>
+			);
+		}
+		else {
+			return (
+				<View style={styles.connectionRow}>
+					<Text style={styles.notConnectedText}>Not Connected</Text>
+				</View>
+			);
+		}
+	};
+
+	renderConnection = ({ item, index}: {item: { connection: HeyJukeConnection }, index: number}) => {
+		const { connection } = item;
 		return (
-			<TouchableOpacity style={styles.connectionRow} onPress={() => {this.onSelectConnection(item)}}>
+			<TouchableOpacity style={styles.connectionRow} onPress={() => {this.onSelectConnection(connection)}}>
 				<View style={styles.connectionDetails}>
-					<Text>{item.name}</Text>
-					<Text>{item.address}:{item.port}</Text>
+					<Text>{connection.name}</Text>
+					<Text>{connection.address}:{connection.port}</Text>
 				</View>
 			</TouchableOpacity>
-		)
+		);
 	};
 
 	render() {
-		const currentConnection = this.state.currentConnection;
 		return (
-			<View style={styles.container}>
-				{(currentConnection) ? (
-					<View style={styles.connectionRow}>
-						<Text style={styles.connectedToText}>Connected To</Text>
-						<View style={styles.connectionDetails}>
-							<Text>{currentConnection.name}</Text>
-							<Text>{currentConnection.address}:{currentConnection.port}</Text>
-						</View>
-					</View>
-				) : (
-					<View style={styles.connectionRow}>
-						<Text style={styles.notConnectedText}>Not Connected</Text>
-					</View>
-				)}
-				<View style={styles.scanSwitchRow}>
-					<Text>Scan For Connections</Text>
-					<View style={styles.scanSwitchContainer}>
-						{(this.state.preparingScanState) ? (
-							<ActivityIndicator animating={true} size={'small'}/>
-						) : (
-							<Switch value={this.state.scanning} onValueChange={this.onScanToggle}/>
-						)}
-					</View>
-				</View>
-				<FlatList
-					style={styles.connectionList}
-					keyExtractor={this.extractItemKey}
-					data={this.state.connections}
-					renderItem={this.renderConnection}/>
-			</View>
+			<TableView sections={this.state.sections}/>
 		);
 	}
 }
