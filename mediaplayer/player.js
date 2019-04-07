@@ -20,6 +20,15 @@ audio.onended = () => {
   send(status);
 }
 
+function pauseAudio() {
+  if (currentMedia == "audio")
+    audio.pause();
+  else if (currentMedia == "youtube")
+    ytplayer.pauseVideo();
+  else if (currentMedia == "spotify")
+    window.spotifyplayer.pause();
+}
+
 // websocket stuff
 var socket = new WebSocket('ws://localhost:8086');
 
@@ -91,7 +100,6 @@ async function playSong(args) {
       break;
     case 'bandcamp':
       currentMedia = "audio"
-      console.log(args)
       const result = await bandcamp.getItemFromURL(args["uri"]);
       console.log(result);
       audio.src = result.audioURL;
@@ -119,12 +127,7 @@ async function playSong(args) {
 }
 
 async function stop(args) {
-  if (currentMedia == "audio")
-    audio.pause();
-  else if (currentMedia == "youtube")
-    ytplayer.pauseVideo();
-  else if (currentMedia == "spotify")
-    window.spotifyplayer.pause();
+  pauseAudio();
   status.status = "paused"
 }
 
@@ -144,10 +147,10 @@ async function kill(args) {
   status.status = "killed";
 }
 
-socket.onmessage = (event) => {
+socket.onmessage = async (event) => {
   var args = JSON.parse(event.data);
   console.log("< " + event.data)
-  commandDict[args["command"]](args);
+  await commandDict[args["command"]](args);
   send(status);
 }
 
