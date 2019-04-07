@@ -9,10 +9,19 @@
 {"command": "play-song", "source":[media], "uri":[path]}
 ```
 Start the song at the specified path from the specified medium. Available media options are: 
+
 ```local``` where the uri is a file path to a audio file on the local machine,
-```spotify``` where the uri is a Spotify UID,
-```youtube``` where the uri is a YouTube URL, and
+
+```youtube``` where the uri is a YouTube URL
+
 ```bandcamp``` where the uri is a BandCamp URL.
+
+```
+{"command": "play-song", "source":[media], "uri":[path], "credential":[key]}
+```
+Start the song from a provider that requires a credential at the specified path from the specified medium. Available media options are: 
+
+```spotify``` where the uri is a Spotify UID
 
 ```
 {"command": "stop"}

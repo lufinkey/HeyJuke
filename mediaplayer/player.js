@@ -73,7 +73,7 @@ async function playSong(args){
       break;
     case 'youtube':
       currentMedia = args["media"];
-      ytplayer.loadVideoById(args["uri"], 0, "small")
+      ytplayer.loadVideoByUrl(args["uri"], 0, "small")
       ytplayer.playVideo();
       send("playback started");
       break;
