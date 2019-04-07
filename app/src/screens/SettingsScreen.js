@@ -40,6 +40,13 @@ export default class SettingsScreen extends PureComponent<Props,State> {
 					onPress: () => {
 						this.props.navigation.push('AccountsSettings');
 					}
+				},
+				{
+					key: 'player',
+					title: "Player",
+					onPress: () => {
+						this.props.navigation.push('PlayerSettings');
+					}
 				}
 			]
 		}

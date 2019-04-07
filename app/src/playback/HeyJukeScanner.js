@@ -14,7 +14,7 @@ type SocketSender = {
 }
 
 type StartScanOptions = {
-	port: number
+	port?: number
 }
 
 export type HeyJukeConnection = {
@@ -31,7 +31,8 @@ class HeyJukeScanner extends EventEmitter {
 	_starting: boolean = false;
 	_connectionExpireInterval: ?any = null;
 
-	async start(options: StartScanOptions) {
+	async start(options: StartScanOptions = {}) {
+		const port = options.port ?? 42069;
 		await this._asyncQueue.run(async () => {
 			if(this._socket != null) {
 				return;
@@ -47,6 +48,7 @@ class HeyJukeScanner extends EventEmitter {
 						this._starting = true;
 						this._socket = socket;
 						this._startConnectionExpireInterval();
+						this.emit('start');
 						resolve();
 					}
 				});
@@ -69,9 +71,10 @@ class HeyJukeScanner extends EventEmitter {
 				socket.on('close', () => {
 					this._socket = null;
 					this._stopConnectionExpireInterval();
+					this.emit('stop');
 				});
 				// bind socket to port
-				socket.bind(options.port);
+				socket.bind(port);
 			});
 		});
 	}
@@ -99,20 +102,26 @@ class HeyJukeScanner extends EventEmitter {
 	}
 
 	_onMessage(message: Buffer, sender: SocketSender) {
+		let existingConnection: ?HeyJukeConnection = null;
 		for(let i=0; i<this._connections.length; i++) {
 			const connection = this._connections[i];
 			if(connection.address === sender.address && connection.port === sender.port) {
+				existingConnection = connection;
 				this._connections.splice(i, 1);
 				break;
 			}
 		}
-		// TODO verify that packet is a HeyJuke packet
-		this._connections.push({
+		const connection = Object.assign((existingConnection || {}), {
 			address: sender.address,
 			port: sender.port,
 			lastMessageTime: (new Date()).getTime()
 		});
-		this.emit('connectionFound', this.connections);
+		if(existingConnection == null) {
+			this.emit('connectionFound', connection);
+		}
+		else {
+			this.emit('connectionUpdated', connection);
+		}
 	}
 
 	_startConnectionExpireInterval() {
@@ -138,6 +147,7 @@ class HeyJukeScanner extends EventEmitter {
 			if((currentTime - connection.lastMessageTime) > 20) {
 				this._connections.splice(i, 1);
 				i--;
+				this.emit('connectionExpired', connection);
 			}
 		}
 	}

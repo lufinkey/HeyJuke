@@ -23,6 +23,7 @@ import PlaylistScreen from './media/PlaylistScreen';
 import SettingsScreen from './SettingsScreen';
 import AccountsSettingsScreen from './settings/AccountsSettingsScreen';
 import SpotifyAccountSettingsScreen from './settings/accounts/SpotifyAccountSettingsScreen';
+import PlayerSettingsScreen from './settings/PlayerSettingsScreen';
 
 import PlayerTabBar from '../components/player/PlayerTabBar';
 
@@ -47,7 +48,7 @@ const createNavigator = (routes: Object, options: {cardStyle?:Object, defaultNav
 		}
 	});
 	return StackNavigator;
-}
+};
 
 
 const TabNavigator = createBottomTabNavigator({
@@ -68,7 +69,8 @@ const TabNavigator = createBottomTabNavigator({
 	SettingsTab: {screen:createNavigator({
 		Settings: {screen:SettingsScreen},
 		AccountsSettings: {screen:AccountsSettingsScreen},
-		SpotifyAccountSettings: {screen:SpotifyAccountSettingsScreen}
+		SpotifyAccountSettings: {screen:SpotifyAccountSettingsScreen},
+		PlayerSettings: {screen:PlayerSettingsScreen}
 	}, {
 		initialRouteName: 'Settings',
 		navigationOptions: {
