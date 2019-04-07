@@ -77,7 +77,7 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 			},
 			{
 				key: 'current-connection',
-				title: "Current Connection"+(HeyJukeClient.connection ? "" : " (Not Connected)"),
+				title: "Current Connection",
 				data: [
 					{
 						key: 'current-connection',
