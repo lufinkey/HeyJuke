@@ -1,7 +1,7 @@
 const router = require('express').Router();
-const {BadRequest, Unauthorized} = require('../s15n/ApiError');
+const {BadRequest, Unauthorized, InternalServerError, StandardError} = require('../s15n/ApiError');
 
-module.exports = function (session, settings) {
+module.exports = function (session, settings, spotify) {
     router.get('/', (req, res, next) => {
         if (req.query["path"] === undefined)
             throw new BadRequest("No path for settings sent");
@@ -80,5 +80,30 @@ module.exports = function (session, settings) {
             res.status(200).send({})
         }).catch(err => next(err));
     });
+
+    router.post('/spotify/swap', async (req, res, next) => {
+        try {
+            const capabilities = session.getCapabilitiesForRequest(req);
+
+            if (capabilities === null)
+                return next(new BadRequest("Request contained an invalid X-Auth-Token"));
+
+            const can = await capabilities.has("settings.spotify");
+            if (!can)
+                return next(new Unauthorized("Unauthorized to administrate Spotify settings"));
+
+            const result = await spotify.swap(req.body.code);
+
+            // send response
+            res.status(response.statusCode).json(result);
+        } catch (error) {
+            if (error.response) {
+                next(new StandardError(error.response.statusCode, "Spotify authentication did not return cleanly", error.data));
+            } else {
+                next(new InternalServerError("Spotify authentication did not return cleanly.", error.data))
+            }
+        }
+    });
+
     return router
 };

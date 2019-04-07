@@ -26,7 +26,6 @@ class HeyJukeServer {
 
     async _loadSettings() {
         const Settings = require('./settings/Settings');
-
         this._settings = new Settings();
         await this._settings.resolve();
     }
@@ -112,7 +111,10 @@ class HeyJukeServer {
 
         expressApp.use('/queue', require('./queue/Routes')(session, queue));
 
-        expressApp.use('/settings', require('./settings/Routes')(session, this._settings));
+
+        const Spotify = require('./settings/Spotify');
+        this._spotify = new Spotify(this._settings);
+        expressApp.use('/settings', require('./settings/Routes')(session, this._settings, this._spotify));
 
         expressApp.use(require('./s15n/ErrorHandler'));
         let webServer = null;
