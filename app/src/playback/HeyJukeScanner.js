@@ -102,10 +102,14 @@ class HeyJukeScanner extends EventEmitter {
 	}
 
 	_onMessage(message: Buffer, sender: SocketSender) {
+		const data = JSON.parse(message.toString('utf8'));
+		if(!data) {
+			return;
+		}
 		let existingConnection: ?HeyJukeConnection = null;
 		for(let i=0; i<this._connections.length; i++) {
 			const connection = this._connections[i];
-			if(connection.address === sender.address && connection.port === sender.port) {
+			if(connection.address === sender.address && connection.port === data.port) {
 				existingConnection = connection;
 				this._connections.splice(i, 1);
 				break;
@@ -113,7 +117,7 @@ class HeyJukeScanner extends EventEmitter {
 		}
 		const connection = Object.assign((existingConnection || {}), {
 			address: sender.address,
-			port: sender.port,
+			port: data.port,
 			lastMessageTime: (new Date()).getTime()
 		});
 		if(existingConnection == null) {
