@@ -18,6 +18,7 @@ type StartScanOptions = {
 }
 
 export type HeyJukeConnection = {
+	name: string,
 	address: string,
 	port: number,
 	lastMessageTime: number
@@ -116,10 +117,12 @@ class HeyJukeScanner extends EventEmitter {
 			}
 		}
 		const connection = Object.assign((existingConnection || {}), {
+			name: data.name,
 			address: sender.address,
 			port: data.port,
 			lastMessageTime: (new Date()).getTime()
 		});
+		this._connections.push(connection);
 		if(existingConnection == null) {
 			this.emit('connectionFound', connection);
 		}
@@ -148,7 +151,7 @@ class HeyJukeScanner extends EventEmitter {
 		const currentTime = (new Date()).getTime();
 		for(let i=0; i<this._connections.length; i++) {
 			const connection = this._connections[i];
-			if((currentTime - connection.lastMessageTime) > 20) {
+			if((currentTime - connection.lastMessageTime) > 20000) {
 				this._connections.splice(i, 1);
 				i--;
 				this.emit('connectionExpired', connection);

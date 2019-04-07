@@ -67,6 +67,7 @@ export default class PlayerSettingsScreen extends PureComponent<Props,State> {
 		this.setState({
 			preparingScanState: true
 		});
+		console.log("preparing scan state ", scanning);
 		if(scanning) {
 			HeyJukeScanner.start().then(() => {
 				this.setState({
@@ -108,13 +109,23 @@ export default class PlayerSettingsScreen extends PureComponent<Props,State> {
 	};
 
 	updateConnections = () => {
+		const connections = HeyJukeScanner.connections;
 		this.setState({
-			connections: HeyJukeScanner.connections
+			connections
 		});
 	};
 
+	extractItemKey = (item: HeyJukeConnection, index: number) => {
+		return `connection-${index}`;
+	};
+
 	renderConnection = ({ item, index}: {item: HeyJukeConnection, index: number}) => {
-		// TODO render item
+		return (
+			<View style={styles.connectionRow}>
+				<Text>{item.name}</Text>
+				<Text>{item.address}:{item.port}</Text>
+			</View>
+		)
 	};
 
 	render() {
@@ -131,6 +142,8 @@ export default class PlayerSettingsScreen extends PureComponent<Props,State> {
 					</View>
 				</View>
 				<FlatList
+					style={styles.connectionList}
+					keyExtractor={this.extractItemKey}
 					data={this.state.connections}
 					renderItem={this.renderConnection}/>
 			</View>
@@ -154,5 +167,13 @@ const styles = StyleSheet.create({
 	},
 	scanSwitchContainer: {
 		//
+	},
+	connectionList: {
+		flex: 1,
+		width: '100%'
+	},
+	connectionRow: {
+		paddingLeft: 10,
+		paddingRight: 10
 	}
 });
