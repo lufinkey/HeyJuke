@@ -1,16 +1,24 @@
 const WebSocket = require("ws")
 const BandcampAPI = require("bandcamp-api")
-var audio = new Audio();
-var bandcamp = new BandcampAPI();
-var currentMedia = "audio";
+let audio = new Audio();
+let bandcamp = new BandcampAPI();
+let currentMedia = "audio";
+
+let status = {
+  domain: "playback",
+  status: "waiting"
+};
 
 const commandDict = {
   "play-song": playSong,
   "stop": stop,
   "continue": resume
-}
+};
 
-audio.onended = () => send("playback ended");
+audio.onended = () => {
+  status.status = "waiting"
+  send(status);
+}
 
 // websocket stuff
 
@@ -21,7 +29,7 @@ socket.onerror = () => {
   console.log("error " + connectAttempts);
 }
 
-socket.onopen = () => send('event connection opened')
+socket.onopen = () => send(status)
 
 // youtube
 
@@ -43,13 +51,10 @@ function onPlayerReady(event) {
 
 var done = false;
 function onPlayerStateChange(event) {
-  if (event.data == YT && !done) {
-    setTimeout(stopVideo, 6000);
-    done = true;
+  if (event.data == 0 && !done) {
+    status.status = "waiting";
+    send(status);
   }
-}
-function stopVideo() {
-  player.stopVideo();
 }
 
 // playing api stuff
@@ -60,7 +65,8 @@ async function playSong(args){
       currentMedia = "audio"
       audio.src = args["uri"];
       audio.play();
-      send("playback started");
+      status.status = "started"
+      send(status);
       break;
     case 'bandcamp':
       currentMedia = "audio"
@@ -69,13 +75,15 @@ async function playSong(args){
       console.log(result);
       audio.src = result.audioURL;
       audio.play();
-      send("playback started");
+      status.status = "started"
+      send(status);
       break;
     case 'youtube':
       currentMedia = args["media"];
       ytplayer.loadVideoByUrl(args["uri"], 0, "small")
       ytplayer.playVideo();
-      send("playback started");
+      status.status = "started"
+      send(status);
       break;
     default:
       console.log('Invalid Media')
@@ -87,7 +95,8 @@ async function stop(args){
     audio.pause();
   else if (currentMedia == "youtube")
     ytplayer.pauseVideo();
-  send("playback paused")
+  status.status = "paused"
+  send(status);
 }
 
 async function resume(args){
@@ -95,7 +104,8 @@ async function resume(args){
     audio.play();
   else if (currentMedia == "youtube")
     ytplayer.playVideo();
-  send("playback resumed")
+  status.status = "resumed"
+  send(status);
 }
 
 socket.onmessage = (event) => {
@@ -104,7 +114,8 @@ socket.onmessage = (event) => {
   commandDict[args["command"]](args);
 }
 
-function send(str) {
-  socket.send(str);
+function send(obj) {
+  var str = JSON.stringify(obj)
   console.log("> " + str);
+  socket.send(str);
 }

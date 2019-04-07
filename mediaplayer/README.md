@@ -12,7 +12,7 @@ Start the song at the specified path from the specified medium. Available media 
 
 ```local``` where the uri is a file path to a audio file on the local machine,
 
-```youtube``` where the uri is a YouTube URL
+```youtube``` where the uri is a YouTube URL in the format `http://www.youtube.com/v/VIDEO_ID?version=3`
 
 ```bandcamp``` where the uri is a BandCamp URL.
 
@@ -36,21 +36,21 @@ Resumes or restarts playback of current song.
 ## Events
 
 ```
-playback ended
+{"domain":"playback","status": "waiting"}
 ```
-The currently playing song has ended
+The mediaplayer is running, and no song is playing or paused. This event is sent on startup as well as when a song finishes. 
 
 ```
-playback paused
+{"domain":"playback","status": "paused"}
 ```
-The currently playing song has paused at a location
+The currently playing song has paused at a location.
 
 ```
-playback resume
+{"domain":"playback","status": "resumes"}
 ```
-The currently playing song has resumed from a paused location
+The currently playing song has resumed from a paused location.
 
 ```
-playback started
+{"domain":"playback","status": "started"}
 ```
-The play-song command was successful
+The play-song command was successful.

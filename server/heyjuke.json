@@ -12,7 +12,8 @@
         "authenticated": [
             "queue.delete",
             "queue.unpause",
-            "queue.pause"
+            "queue.pause",
+            "settings.get.spotify"
         ]
     },
     "local_sources": {

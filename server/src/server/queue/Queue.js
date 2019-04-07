@@ -4,6 +4,11 @@ class Queue {
         this.queue = [];
         this.remote = remote;
         this.is_playing = true;
+
+        this.remote.on('waiting', () => {
+            if (this.now_playing)
+                this.progressQueue();
+        });
     }
 
     addToQueue(item) {
