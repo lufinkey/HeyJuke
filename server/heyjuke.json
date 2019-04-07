@@ -7,13 +7,20 @@
         "unauthenticated": [
             "queue.list",
             "queue.put",
-            "localSearch"
+            "localSearch",
+            "settings.get.spotify.client_id",
+            "settings.get.spotify.redirect_url",
+            "settings.get.spotify.access_token",
+            "settings.get.spotify.refresh_token",
+            "settings.get.spotify.token_expiration",
+            "settings.set.spotify.access_token",
+            "settings.set.spotify.refresh_token",
+            "settings.set.spotify.token_expiration"
         ],
         "authenticated": [
             "queue.delete",
             "queue.unpause",
-            "queue.pause",
-            "settings.get.spotify"
+            "queue.pause"
         ]
     },
     "local_sources": {
