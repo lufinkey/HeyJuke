@@ -264,7 +264,7 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 		);
 	};
 
-	renderSectionFooter = ({ section }: {section: {key: string, title: string}}) => {
+	renderSectionFooter = ({ section }: {section: Object}) => {
 		if(section.key === 'connections') {
 			if(!this.state.scanning) {
 				return null;
