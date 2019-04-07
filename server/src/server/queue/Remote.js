@@ -78,8 +78,8 @@ class Remote extends EventEmitter {
 
     onMessage(message) {
         const msg = JSON.parse(message);
-        if (!msg.domain === "playback") return;
-        if (!msg.status === "waiting") return;
+        if (msg.domain !== "playback") return;
+        if (msg.status !== "waiting") return;
         this.emit('waiting', {});
     }
 

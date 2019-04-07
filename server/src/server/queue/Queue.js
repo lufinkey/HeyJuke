@@ -21,6 +21,7 @@ class Queue {
             // We only do this if its playing because now_playing suggests the song was already 'playing'.
             // This way, when we recontinue, we know to requeue this song to the actual media player
             this.now_playing = item;
+            console.log("PREEMPT PLAY");
             this.remote.play_song(this.now_playing);
             return;
         }
@@ -54,6 +55,7 @@ class Queue {
     }
 
     progressQueue() {
+        console.log("PROGRESS QUEUE");
         if (this.queue.length === 0) {
             this.now_playing = null;
             return;
