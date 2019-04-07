@@ -47,7 +47,14 @@ Capability: queue.put
 }
 ```
 
-## DELETE /queue?uri=file%3A%2F%2F%2Ftest
+#### Response
+```
+{
+    "uid": "uniqueId"
+}
+```
+
+## DELETE /queue?uid=uniqueId
 
 Removes an item from the queue.
 
