@@ -5,6 +5,10 @@ import type {
 	HeyJukeConnection
 } from './HeyJukeScanner';
 
+import {
+	Track
+} from '../library/types';
+
 
 class HeyJukeClient {
 	_connection: ?HeyJukeConnection = null;
@@ -74,6 +78,27 @@ class HeyJukeClient {
 
 	get isUpdatingConnection(): boolean {
 		return this._updatingConnection;
+	}
+
+
+	async sendRequest(method: string, endpoint: string, body: any) {
+		const connection = this._connection;
+		if(connection == null) {
+			throw new Error("Not connected to server");
+		}
+		return await this._sendRequest(connection, {
+			method,
+			endpoint,
+			body,
+			authToken: this._authToken
+		});
+	}
+
+	async addTrackToQueue(track: Track) {
+		return await this.sendRequest('POST', 'queue', {
+			uri: track.uri,
+			source: track.provider.name
+		});
 	}
 }
 
