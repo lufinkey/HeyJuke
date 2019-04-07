@@ -119,7 +119,12 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 	};
 
 	onSelectConnection(connection: HeyJukeConnection) {
-		HeyJukeClient.connection = connection;
+		HeyJukeClient.setConnection(connection).then(() => {
+			this.updateConnections();
+		}).catch((error) => {
+			Alert.alert("Error", error.message);
+			this.updateConnections();
+		});
 		this.updateConnections();
 	}
 
