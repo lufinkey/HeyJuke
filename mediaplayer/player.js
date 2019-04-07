@@ -82,7 +82,7 @@ const playSpotify = ({
 
 async function playSong(args) {
   stop(args);
-  switch (args["media"]) {
+  switch (args["source"]) {
     case 'local':
       currentMedia = "audio"
       audio.src = args["uri"];
@@ -99,13 +99,13 @@ async function playSong(args) {
       status.status = "started"
       break;
     case 'youtube':
-      currentMedia = args["media"];
+      currentMedia = args["source"];
       ytplayer.loadVideoByUrl(args["uri"], 0, "small")
       ytplayer.playVideo();
       status.status = "started"
       break;
     case 'spotify':
-      currentMedia = args["media"];
+      currentMedia = args["source"];
       playSpotify({
         playerInstance: window.spotifyplayer,
         spotify_uri: 'spotify:track:3Pt8XN6zWFmW2ShLna8Ttb'
@@ -113,7 +113,7 @@ async function playSong(args) {
       status.status = "started"
       break;
     default:
-      console.log('Invalid Media');
+      console.log('Invalid Source');
       status.status = "waiting";
   }
 }
