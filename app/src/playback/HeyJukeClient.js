@@ -1,5 +1,7 @@
 // @flow
 
+import * as QueryString from 'querystring';
+
 import AsyncQueue from '../util/AsyncQueue';
 import type {
 	HeyJukeConnection
@@ -16,7 +18,7 @@ class HeyJukeClient {
 	_updatingConnection: boolean = false;
 	_connectionQueue = new AsyncQueue();
 
-	_sendRequest(connection: HeyJukeConnection, options: {endpoint: string, method: string, body: any, authToken?: ?string}) {
+	_sendRequest(connection: HeyJukeConnection, options: {endpoint: string, method: string, params: any, authToken?: ?string}) {
 		return new Promise((resolve, reject) => {
 			const xhr = new XMLHttpRequest();
 			xhr.responseType = 'arraybuffer';
@@ -36,13 +38,17 @@ class HeyJukeClient {
 			xhr.onerror = (error) => {
 				reject(error);
 			};
-			xhr.open(options.method, `http://${connection.address}:${connection.port}/${options.endpoint}`);
+			let url = `http://${connection.address}:${connection.port}/${options.endpoint}`;
+			if(['GET','DELETE'].includes(options.method)) {
+				url += '?'+QueryString.stringify(options.params);
+			}
+			xhr.open(options.method, url);
 			if(options.authToken != null) {
 				xhr.setRequestHeader('X-Auth-Token', options.authToken);
 			}
-			if(options.body != null) {
+			if(options.params != null && !['GET','DELETE'].includes(options.method)) {
 				xhr.setRequestHeader('Content-Type', 'application/json');
-				xhr.send(JSON.stringify(options.body));
+				xhr.send(JSON.stringify(options.params));
 			}
 			else {
 				xhr.send();
@@ -57,7 +63,7 @@ class HeyJukeClient {
 				const { token } = await this._sendRequest(connection, {
 					endpoint: 'auth/login',
 					method: 'POST',
-					body: {
+					params: {
 						method: 'anonymous'
 					}
 				});
@@ -81,7 +87,7 @@ class HeyJukeClient {
 	}
 
 
-	async sendRequest(method: string, endpoint: string, body: any) {
+	async sendRequest(method: string, endpoint: string, params: any) {
 		const connection = this._connection;
 		if(connection == null) {
 			throw new Error("Not connected to server");
@@ -89,7 +95,7 @@ class HeyJukeClient {
 		return await this._sendRequest(connection, {
 			method,
 			endpoint,
-			body,
+			params,
 			authToken: this._authToken
 		});
 	}
@@ -98,6 +104,18 @@ class HeyJukeClient {
 		return await this.sendRequest('POST', 'queue', {
 			uri: track.uri,
 			source: track.provider.name
+		});
+	}
+
+	async getSetting(key: string) {
+		return await this.sendRequest('GET', 'settings', {
+			path: key
+		});
+	}
+
+	async setSetting(key: string, value: any) {
+		return await this.sendRequest('POST', 'settings', {
+			[key]: value
 		});
 	}
 }
