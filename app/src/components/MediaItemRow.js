@@ -121,7 +121,7 @@ export default class MediaItemRow extends PureComponent<Props,State> {
 				text: "Add to Queue",
 				onSelect: () => {
 					HeyJukeClient.addTrackToQueue(mediaItem).catch((error) => {
-
+						Alert.alert("Error", error.message);
 					});
 				}
 			});

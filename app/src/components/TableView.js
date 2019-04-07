@@ -79,7 +79,7 @@ export default class TableView extends PureComponent<Props,State> {
 				<Text style={styles.sectionTitle}>{section.title}</Text>
 			</View>
 		);
-	}
+	};
 
 	renderItem = ({ item, index, section }: {item: Item, index: number, section: Section}) => {
 		if(item.render) {
@@ -109,7 +109,7 @@ export default class TableView extends PureComponent<Props,State> {
 				</View>
 			</ItemView>
 		);
-	}
+	};
 
 	render() {
 		return (

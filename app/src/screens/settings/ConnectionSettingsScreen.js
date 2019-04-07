@@ -9,6 +9,7 @@ import {
 	TouchableOpacity,
 	View
 } from 'react-native';
+import Spotify from 'rn-spotify-sdk';
 
 import Theme from '../../Theme';
 import {
@@ -29,8 +30,8 @@ type Props = {
 type State = {
 	preparingScanState: boolean,
 	scanning: boolean,
-	connections: Array<HeyJukeConnection>,
-	currentConnection: ?HeyJukeConnection,
+	connection: ?HeyJukeConnection,
+	settingUpSpotify: boolean,
 	sections: Array<any>
 }
 
@@ -40,9 +41,9 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 
 		this.state = {
 			preparingScanState: false,
-			scanning: false,
-			connections: [],
-			currentConnection: null,
+			scanning: HeyJukeScanner.scanning,
+			connection: HeyJukeClient.connection,
+			settingUpSpotify: false,
 			sections: []
 		};
 	}
@@ -51,7 +52,6 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 		HeyJukeScanner.addListener('connectionFound', this.onScannerConnectionFound);
 		HeyJukeScanner.addListener('connectionUpdated', this.onScannerConnectionUpdated);
 		HeyJukeScanner.addListener('connectionExpired', this.onScannerConnectionExpired);
-		this.updateConnections();
 		this.updateSections();
 	}
 
@@ -72,6 +72,10 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 					{
 						key: 'scan-for-connections',
 						render: this.renderScanForConnections
+					},
+					{
+						key: 'setup-spotify',
+						render: this.renderSetupSpotify
 					}
 				]
 			},
@@ -98,77 +102,101 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 			}
 		) : []);
 		this.setState({
-			sections: sections
+			sections: sections,
+			scanning: HeyJukeScanner.scanning,
+			connection: HeyJukeClient.connection
 		});
 	}
 
-	updateConnections = () => {
-		this.setState({
-			scanning: HeyJukeScanner.scanning,
-			connections: HeyJukeScanner.connections,
-			currentConnection: HeyJukeClient.connection
-		});
-	};
+
 
 	onScanToggle = (scanning: boolean) => {
 		this.setState({
 			preparingScanState: true
 		});
 		if(scanning) {
-			HeyJukeScanner.start().then(() => {
-				this.setState({
-					preparingScanState: false,
-					scanning: true
-				});
-			}).catch((error) => {
+			HeyJukeScanner.start().catch((error) => {
 				Alert.alert("Error", error.message);
+			}).finally(() => {
 				this.setState({
 					preparingScanState: false
 				});
+				this.updateSections();
 			});
 		}
 		else {
-			HeyJukeScanner.stop().then(() => {
-				this.setState({
-					preparingScanState: false,
-					scanning: false
-				});
-			}).catch((error) => {
+			HeyJukeScanner.stop().catch((error) => {
 				Alert.alert("Error", error.message);
+			}).finally(() => {
 				this.setState({
 					preparingScanState: false
 				});
+				this.updateSections();
 			});
 		}
 	};
 
 	onScannerConnectionFound = (connection: HeyJukeConnection) => {
-		this.updateConnections();
 		this.updateSections();
 	};
 
 	onScannerConnectionUpdated = (connection: HeyJukeConnection) => {
-		this.updateConnections();
 		this.updateSections();
 	};
 
 	onScannerConnectionExpired = (connection: HeyJukeConnection) => {
-		this.updateConnections();
 		this.updateSections();
 	};
 
-	onSelectConnection(connection: HeyJukeConnection) {
-		HeyJukeClient.setConnection(connection).then(() => {
-			this.updateConnections();
-			this.updateSections();
-		}).catch((error) => {
+
+	onPressSetupSpotify = async () => {
+		this.setState({
+			settingUpSpotify: false
+		});
+		try {
+			const connection = HeyJukeClient.connection;
+			if(!connection) {
+				throw new Error("Not connected to server");
+			}
+			const { clientId, redirectURL } = await HeyJukeClient.getSetting('spotify');
+			const session = await Spotify.authenticate({
+				showDialog: true,
+				clientID: clientId,
+				redirectURL: redirectURL,
+				tokenSwapURL: `http://${connection.address}:${connection.port}/settings/spotify/swap`
+			});
+			if(session) {
+				await HeyJukeClient.setSetting('spotify', {
+					clientId,
+					redirectURL,
+					accessToken: session.accessToken,
+					refreshToken: session.refreshToken,
+					expireTime: session.expireTime
+				});
+			}
+			this.setState({
+				settingUpSpotify: false
+			});
+		}
+		catch(error) {
 			Alert.alert("Error", error.message);
-			this.updateConnections();
+			this.setState({
+				settingUpSpotify: false
+			});
+		}
+	};
+
+
+	onSelectConnection(connection: HeyJukeConnection) {
+		HeyJukeClient.setConnection(connection).catch((error) => {
+			Alert.alert("Error", error.message);
+		}).finally(() => {
 			this.updateSections();
 		});
-		this.updateConnections();
 		this.updateSections();
 	}
+
+
 
 	renderScanForConnections = () => {
 		return (
@@ -182,6 +210,23 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 					)}
 				</View>
 			</View>
+		);
+	};
+
+	renderSetupSpotify = () => {
+		let RowView: any = View;
+		if(!this.state.settingUpSpotify && this.state.connection) {
+			RowView = TouchableOpacity;
+		}
+		return (
+			<RowView
+				style={styles.setupSpotifyButton}
+				onPress={this.onPressSetupSpotify}>
+				<Text>Setup Spotify</Text>
+				{(this.state.settingUpSpotify) ? (
+					<ActivityIndicator animating={true} size={'small'}/>
+				) : null}
+			</RowView>
 		);
 	};
 
@@ -200,7 +245,7 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 		}
 		else {
 			return (
-				<View style={styles.connectionRow}>
+				<View style={styles.notConnectedRow}>
 					<Text style={styles.notConnectedText}>Not Connected</Text>
 				</View>
 			);
@@ -221,7 +266,7 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 
 	render() {
 		return (
-			<TableView sections={this.state.sections}/>
+			<TableView style={styles.container} sections={this.state.sections}/>
 		);
 	}
 }
@@ -232,25 +277,34 @@ const styles = StyleSheet.create({
 		flex: 1,
 		width: '100%'
 	},
+
 	scanSwitchRow: {
 		paddingLeft: 10,
 		paddingRight: 10,
 		height: 44,
 		flexDirection: 'row',
 		justifyContent: 'space-between',
-		alignItems: 'center'
+		alignItems: 'center',
+		backgroundColor: Theme.secondaryBackgroundColor
 	},
 	scanSwitchContainer: {
 		//
 	},
-	connectionList: {
-		flex: 1,
-		width: '100%'
+
+	setupSpotifyButton: {
+		height: 44,
+		justifyContent: 'space-between',
+		paddingLeft: 10,
+		paddingRight: 10,
+		justifyContent: 'center',
+		backgroundColor: Theme.secondaryBackgroundColor
 	},
+
 	connectionRow: {
 		height: 64,
 		paddingLeft: 10,
-		paddingRight: 10
+		paddingRight: 10,
+		backgroundColor: Theme.secondaryBackgroundColor
 	},
 	connectionDetails: {
 		flexDirection: 'column'
@@ -259,11 +313,16 @@ const styles = StyleSheet.create({
 		color: 'green',
 		fontWeight: 'bold'
 	},
+
+	notConnectedRow: {
+		height: 64,
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: Theme.secondaryBackgroundColor
+	},
 	notConnectedText: {
-		alignSelf: 'center',
 		textAlign: 'center',
 		color: Theme.secondaryTextColor,
-		fontWeight: 'bold',
-		flex: 1
+		fontWeight: 'bold'
 	}
 });
