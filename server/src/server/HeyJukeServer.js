@@ -7,9 +7,7 @@ const WEB_SOCKET_PORT = 8086;
 
 
 class HeyJukeServer {
-    constructor(options = {}) {
-        this._options = {...options};
-
+    constructor() {
         this._expressApp = null;
         this._webServer = null;
         this._webSocketServer = null;
@@ -19,70 +17,23 @@ class HeyJukeServer {
     }
 
     get webServerPort() {
-        return this._options.webServerPort || WEB_SERVER_PORT;
+        return this.settings.webServerPort || WEB_SERVER_PORT;
     }
 
     get webSocketPort() {
-        return this._options.webSocketPort || WEB_SOCKET_PORT;
+        return this.settings.webSocketPort || WEB_SOCKET_PORT;
     }
 
     async _loadSettings() {
         const Settings = require('./settings/Settings');
 
-        this.settings = new Settings();
-        await this.settings.resolve();
+        this._settings = new Settings();
+        await this._settings.resolve();
     }
 
-    async _startWebSocketServer() {
-        if (this._webSocketServer) {
-            throw new Error("web socket server has already started");
-        }
-        let listening = false;
-        const webSocketServer = new WebSocket.Server({
-            port: this.webSocketPort
-        });
-        this._webSocketServer = webSocketServer;
-        webSocketServer.on('connection', (webSocket) => {
-            if (this._webSocket != null) {
-                webSocket.close();
-                return;
-            }
-            this._webSocket = webSocket;
-            webSocket.on('error', (error) => {
-                this.onSocketError(error);
-            });
-            webSocket.on('message', (message) => {
-                this.onSocketMessage(message);
-            });
-            webSocket.on('close', (code, reason) => {
-                console.log("web socket closed: " + code + ": " + reason);
-                this._webSocket = null;
-            });
-        });
-        webSocketServer.on('listening', () => {
-            listening = true;
-        });
-        webSocketServer.on('error', () => {
-            if (!listening) {
-                webSocketServer.close();
-            }
-        });
-        webSocketServer.on('close', () => {
-            this._webSocketServer = null;
-        });
-    }
-
-    async _stopWebSocketServer() {
-        if (!this._webSocketServer) {
-            return;
-        }
-        await new Promise((resolve, reject) => {
-            this._webSocketServer.close(() => {
-                resolve();
-            });
-        });
-        this._webSocketServer = null;
-    }
+     get settings() {
+         return this._settings.settings
+     }
 
     async _startWebServer() {
         if (this._webServer) {
@@ -91,49 +42,77 @@ class HeyJukeServer {
             throw new Error("web server is already starting");
         }
 
-
         const expressApp = express();
         this._expressApp = expressApp;
-        // Todo: lmao no
-        const argon = require('argon2');
+
         const Capability = require('./auth/StaticCapabilities');
         const StaticPasswordAuthenticator = require('./auth/StaticPasswordAuthenticator');
+        const AnonymousAuthenticator = require('./auth/AnonymousAuthenticator');
         const Container = require('./auth/AuthSessionContainer');
         const AuthManager = require('./auth/AuthManager');
         const {createLocalDb} = require('./local/LocalDb');
         const LocalDbCollection = require('./local/LocalDbCollection');
+        const Beacon = require('./beacon/Beacon');
+
+        this.beacon = new Beacon(this.webServerPort, this.settings.server_id, "0.0.0.0");
+        await this.beacon.socketBind();
+        this.beacon.startTimer();
+
         expressApp.use(require('morgan')(process.env.NODE_ENV === "production" ? 'common' : 'dev'));
         expressApp.use(express.json());
 
+        const capset = new Map();
+
         const unauthSet = new Set();
-        unauthSet.add("localSearch");
+        for (const s of this.settings.permissions.unauthenticated)
+            unauthSet.add(s);
+
         const unauthedCapability = new Capability(unauthSet);
 
         const authSet = new Set(unauthSet);
+        for (const s of this.settings.permissions.authenticated)
+            unauthSet.add(s);
         const authedCapability = new Capability(authSet);
 
         const session = new Container(unauthedCapability);
 
-        const testDb = await createLocalDb('./test_local');
-        const testUpdate = testDb.createUpdateHelper();
-        await testUpdate.processFullQueue();
-        await testDb.saveIndex();
-
         const local = new LocalDbCollection();
-        local.addCollection('test', await createLocalDb('./test_local'));
+        for (const id in this.settings.local_sources) {
+            if (!this.settings.local_sources.hasOwnProperty(id)) continue;
+
+            const db = await createLocalDb(this.settings.local_sources[id]);
+            const update = db.createUpdateHelper();
+            await update.processFullQueue();
+            await db.saveIndex();
+
+            local.addCollection(id, db);
+        }
 
         expressApp.use('/auth', require('./auth/Routes')(
             new AuthManager(
                 {
                     "password": new StaticPasswordAuthenticator(
-                        await argon.hash('test'),
+                        this.settings.main_password_hash,
                         authedCapability
+                    ),
+                    "anonymous": new AnonymousAuthenticator(
+                        unauthedCapability
                     )
                 }),
             session));
+
         expressApp.use('/local', require('./local/Routes')(
             session, local
         ));
+
+        const Remote = require('./queue/Remote');
+        const Queue = require('./queue/Queue');
+        const remote = new Remote(this.webSocketPort);
+        const queue = new Queue(remote);
+
+        expressApp.use('/queue', require('./queue/Routes')(session, queue));
+
+        expressApp.use('/settings', require('./settings/Routes')(session, this._settings));
 
         expressApp.use(require('./s15n/ErrorHandler'));
         let webServer = null;
@@ -162,26 +141,24 @@ class HeyJukeServer {
     async start() {
         try {
             await this._loadSettings();
-            await this._startWebSocketServer();
             await this._startWebServer();
         } catch (error) {
             await this._stopWebServer();
-            await this._stopWebSocketServer();
-            throw error;
+            console.log(error)
         }
     }
 
     async stop() {
         await this._stopWebServer();
-        await this._stopWebSocketServer();
-    }
+        if (this.beacon !== undefined) {
+            this.beacon.close();
+            this.beacon = undefined
+        }
 
-    onSocketError(error) {
-        // TODO handle electron error
-    }
-
-    onSocketMessage(message) {
-        // TODO handle electron message
+        if (this.remote !== undefined) {
+            this.remote.close();
+            this.remote = undefined
+        }
     }
 }
 

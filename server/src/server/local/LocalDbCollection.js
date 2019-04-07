@@ -84,7 +84,7 @@ class LocalDbCollection {
                     album: doc.album,
                     year: doc.year
                 };
-                o["uri"] = path.join(db.rootPath, doc.path);
+                o["uri"] = "file://" + path.join(db.rootPath, doc.path);
                 delete o["ref"];
             }
 

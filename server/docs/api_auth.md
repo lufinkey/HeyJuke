@@ -36,6 +36,14 @@ Contains the method to use when authenticating. Additional payload options for t
 }
 ```
 
++ anonymous - No other fields, will return a default access token.
+
+```
+{
+  "method": "anonymous"
+}
+```
+
 #### Response
 
 On success, this will return the token. Future requests should include this token in the `X-Auth-Token` header.
@@ -63,3 +71,4 @@ On success, an empty response is sent.
 ```
 {}
 ```
+

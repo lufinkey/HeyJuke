@@ -25,6 +25,8 @@ class AuthSessionContainer {
         const token = this._createUnusedAuthToken();
 
         this._auths.set(token, capabilities);
+        console.log(`auths:${JSON.stringify(this._auths.entries())} ${this._auths.has(token)}`);
+
         return token
     }
 
@@ -43,6 +45,7 @@ class AuthSessionContainer {
      * Returns the capabilites for a passed token.
      */
     getCapabilitiesForAuthorization(token) {
+        console.log(`auths:${JSON.stringify(this._auths.entries())} ${this._auths.has(token)}`);
         const capabilities = this._auths.get(token);
         if (capabilities === undefined)
             return null;
