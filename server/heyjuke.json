@@ -8,6 +8,8 @@
             "queue.list",
             "queue.put",
             "localSearch",
+            "settings.get.spotify",
+            "settings.set.spotify",
             "settings.get.spotify.client_id",
             "settings.get.spotify.redirect_url",
             "settings.get.spotify.access_token",
