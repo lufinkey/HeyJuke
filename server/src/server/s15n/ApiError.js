@@ -7,6 +7,12 @@ class StandardError {
     }
 }
 
+class InternalServerError extends StandardError {
+    constructor(message, prodData={}, devData={}) {
+        super(500, message, prodData, devData);
+    }
+}
+
 class BadRequest extends StandardError {
     constructor(message, prodData={}, devData={}) {
         super(400, message, prodData, devData);
@@ -29,5 +35,6 @@ module.exports = {
     StandardError,
     BadRequest,
     Unauthorized,
-    NotFound
+    NotFound,
+    InternalServerError
 };

@@ -26,6 +26,7 @@ import QueueItem from '../playback/QueueItem';
 import ActionSheet from './ActionSheet';
 import type { ActionSheetOption } from './ActionSheet';
 import { capitalizeString } from '../util/misc';
+import HeyJukeClient from '../playback/HeyJukeClient';
 
 
 export type MediaItemMenuOptionKey =
@@ -119,7 +120,9 @@ export default class MediaItemRow extends PureComponent<Props,State> {
 				key: 'add-to-queue',
 				text: "Add to Queue",
 				onSelect: () => {
-					// TODO add to queue
+					HeyJukeClient.addTrackToQueue(mediaItem).catch((error) => {
+						Alert.alert("Error", error.message);
+					});
 				}
 			});
 		}

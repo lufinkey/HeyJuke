@@ -7,16 +7,33 @@
         "unauthenticated": [
             "queue.list",
             "queue.put",
-            "localSearch"
+            "localSearch",
+            "settings.get.spotify",
+            "settings.set.spotify",
+            "settings.get.spotify.clientId",
+            "settings.get.spotify.redirectURL",
+            "settings.get.spotify.accessToken",
+            "settings.get.spotify.refreshToken",
+            "settings.get.spotify.tokenExpiration",
+            "settings.set.spotify.accessToken",
+            "settings.set.spotify.refreshToken",
+            "settings.set.spotify.tokenExpiration",
+            "settings.spotify"
         ],
         "authenticated": [
             "queue.delete",
             "queue.unpause",
-            "queue.pause",
-            "settings.get.spotify"
+            "queue.pause"
         ]
     },
     "local_sources": {
         "test": "./test_local"
+    },
+    "spotify_secrets": {
+        "clientSecret": "8cdaf3d111e64be2887af3de153f02bf"
+    },
+    "spotify": {
+        "clientId": "63cb2b59435449de947089e1f067e17f",
+        "redirectURL": "heyjuke://spotify"
     }
 }

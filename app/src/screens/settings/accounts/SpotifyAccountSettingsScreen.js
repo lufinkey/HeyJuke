@@ -36,6 +36,8 @@ export default class SpotifyAccountSettingsScreen extends PureComponent<Props,St
 		title: "Spotify"
 	};
 
+	mounted: boolean = false;
+
 	sessionInterval: ?any;
 	
 	constructor(props: Props) {
@@ -49,12 +51,14 @@ export default class SpotifyAccountSettingsScreen extends PureComponent<Props,St
 	}
 
 	componentDidMount() {
+		this.mounted = true;
 		if(this.state.loggedIn) {
 			this.startSessionTimer();
 		}
 	}
 
 	componentWillUnmount() {
+		this.mounted = false;
 		this.stopSessionTimer();
 	}
 
@@ -94,7 +98,7 @@ export default class SpotifyAccountSettingsScreen extends PureComponent<Props,St
 		}).catch((error) => {
 			Alert.alert("Error", error.message);
 		});
-	}
+	};
 
 	didPressLogout = () => {
 		SpotifyProvider.logout().then(() => {
@@ -105,7 +109,7 @@ export default class SpotifyAccountSettingsScreen extends PureComponent<Props,St
 		}).catch((error) => {
 			Alert.alert("Error", error.message);
 		});
-	}
+	};
 
 	didPressRenew = () => {
 		if(this.state.renewingSession) {
@@ -115,16 +119,22 @@ export default class SpotifyAccountSettingsScreen extends PureComponent<Props,St
 			renewingSession: true
 		});
 		Spotify.renewSession().then(() => {
+			if(!this.mounted) {
+				return;
+			}
 			this.setState({
 				renewingSession: false
 			});
 		}).catch((error) => {
+			if(!this.mounted) {
+				return;
+			}
 			this.setState({
 				renewingSession: false
 			});
 			Alert.alert("Error", error.message);
 		});
-	}
+	};
 
 	render() {
 		return (

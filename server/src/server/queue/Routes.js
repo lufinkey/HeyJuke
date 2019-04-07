@@ -2,6 +2,10 @@ const router = require('express').Router();
 const {BadRequest, Unauthorized} = require('../s15n/ApiError');
 const QueueEntry = require('./QueueEntry');
 
+function generateAuthToken() {
+    return crypto.randomBytes(21).toString('base64')
+}
+
 module.exports = function (session, queue) {
     router.get('/', (req, res, next) => {
         const capabilities = session.getCapabilitiesForRequest(req);
@@ -38,8 +42,9 @@ module.exports = function (session, queue) {
 
         capabilities.has("queue.put").then(function (has) {
             if (has) {
-                queue.addToQueue(new QueueEntry(token, payload.source, payload.uri));
-                res.status(200).send({})
+                const id = generateAuthToken();
+                queue.addToQueue(new QueueEntry(token, payload.source, payload.uri, id));
+                res.status(200).send({id})
             } else
                 throw new Unauthorized("Not permitted to perform queue put");
         }).catch(err => next(err))
@@ -47,15 +52,15 @@ module.exports = function (session, queue) {
     });
 
     router.delete('/', (req, res, next) => {
-        if (req.query["uri"] === undefined)
-            throw new BadRequest("URI undefined");
+        if (req.query["uid"] === undefined)
+            throw new BadRequest("UID undefined");
 
         const token = req.headers["x-auth-token"];
         if (token === undefined)
             throw new Unauthorized("No token presented to administrate queue entries");
 
-        const uri = req.query["uri"];
-        const idx = queue.find(uri);
+        const uid = req.query["uid"];
+        const idx = queue.find(uid);
         if (idx === null)
             throw new BadRequest("Song does not exist in queue");
 

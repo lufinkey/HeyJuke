@@ -1,4 +1,7 @@
 const process = require('process');
+const EventEmitter = require('events').EventEmitter;
+
+const {diff} = require('deep-object-diff');
 
 const FileSettings = require('./FileSettings');
 
@@ -7,9 +10,7 @@ const ENV_REPLACEMENT_PATTERN = /%(.+)%/;
 const SETTINGS_DEFAULT_SEARCH_PATH = "/etc/heyjuke.json;%HOME%/heyjuke.json;./heyjuke.json;./heyjuke.app.json";
 const SETTINGS_DEFAULT_AUTOSAVE_PATH = "./heyjuke.app.json";
 
-const defaults = {
-
-};
+const defaults = {};
 
 function performEnvReplacement(s) {
     return s.replace(ENV_REPLACEMENT_PATTERN, (match, env) => {
@@ -19,9 +20,10 @@ function performEnvReplacement(s) {
     })
 }
 
-class Settings {
+class Settings extends EventEmitter {
     constructor(searchPath = SETTINGS_DEFAULT_SEARCH_PATH,
                 autosavePath = SETTINGS_DEFAULT_AUTOSAVE_PATH) {
+        super();
         const searches = searchPath.split(';');
         this.settings = undefined;
         this.settingsInstances = [];
@@ -55,14 +57,40 @@ class Settings {
         this.autosave = autosaveResult.settings;
     }
 
-    async resolve() {
+    broadcastDiff(prefix, d) {
+        for (const i in d) {
+            if (!d.hasOwnProperty(i))
+                continue;
+
+            let path = prefix;
+            if (path !== "")
+                path += ".";
+            path += i;
+
+            const e = d[i];
+
+            if (typeof e === "object")
+                this.broadcastDiff(path, e);
+            else
+                this.emit(path, i)
+        }
+    }
+
+    async resolve(previous = undefined) {
         const promises = [];
         for (const instance of this.settingsViaPath) {
             promises.push(instance[1].load())
         }
         await Promise.all(promises);
 
-        return this.collapse()
+        const col = this.collapse();
+
+        if (previous === undefined)
+            previous = {};
+
+        const d = diff(previous, col);
+        this.broadcastDiff("", d);
+        return col;
     }
 
     get settableSettings() {
@@ -70,8 +98,10 @@ class Settings {
     }
 
     async setSettings(settings) {
+        const previous = this.settings;
         this.autosave.state = settings;
-        await this.autosave.save()
+        await this.autosave.save();
+        await this.resolve(previous)
     }
 
     collapse() {
