@@ -264,9 +264,26 @@ export default class ConnectionSettingsScreen extends PureComponent<Props,State>
 		);
 	};
 
+	renderSectionFooter = ({ section }: {section: {key: string, title: string}}) => {
+		if(section.key === 'connections') {
+			if(!this.state.scanning) {
+				return null;
+			}
+			return (
+				<View style={styles.connectionsFooter}>
+					<ActivityIndicator animating={true} size={'small'}/>
+				</View>
+			);
+		}
+		return null;
+	};
+
 	render() {
 		return (
-			<TableView style={styles.container} sections={this.state.sections}/>
+			<TableView
+				style={styles.container}
+				sections={this.state.sections}
+				renderSectionFooter={this.renderSectionFooter}/>
 		);
 	}
 }
@@ -324,5 +341,12 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 		color: Theme.secondaryTextColor,
 		fontWeight: 'bold'
+	},
+
+	connectionsFooter: {
+		justifyContent: 'center',
+		alignItems: 'center',
+		paddingTop: 4,
+		paddingBottom: 4
 	}
 });

@@ -39,6 +39,8 @@ type Props = {
 		item: Item,
 		index: number,
 		section: Section }) => any,
+	renderSectionHeader?: (info: { section: Section}) => any,
+	renderSectionFooter?: (info: { section: Section}) => any,
 	style?: ?Object | ?Array<Object>,
 	extraData?: Object
 }
@@ -71,6 +73,9 @@ export default class TableView extends PureComponent<Props,State> {
 	}
 
 	renderSectionHeader = ({ section }: {section: Section}) => {
+		if(this.props.renderSectionHeader) {
+			return this.props.renderSectionHeader({ section });
+		}
 		if(section.title == null) {
 			return null;
 		}
@@ -117,7 +122,8 @@ export default class TableView extends PureComponent<Props,State> {
 				{...this.props}
 				style={this.state.style}
 				renderItem={this.renderItem}
-				renderSectionHeader={this.renderSectionHeader}/>
+				renderSectionHeader={this.renderSectionHeader}
+				renderSectionFooter={this.props.renderSectionFooter}/>
 		);
 	}
 }
