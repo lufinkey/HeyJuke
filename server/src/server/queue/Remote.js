@@ -38,7 +38,8 @@ class Remote extends EventEmitter {
             this.client.on('close', (code, reason) => {
                 console.log("web socket closed: " + code + ": " + reason);
                 this.client = null;
-            })
+            });
+            this.emit('connected', {});
         });
     }
 

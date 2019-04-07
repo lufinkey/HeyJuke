@@ -5,6 +5,11 @@ class Queue {
         this.remote = remote;
         this.is_playing = true;
 
+        this.remote.on('connected', () => {
+            if (this.now_playing)
+                this.progressQueue();
+        });
+
         this.remote.on('waiting', () => {
             if (this.now_playing)
                 this.progressQueue();
