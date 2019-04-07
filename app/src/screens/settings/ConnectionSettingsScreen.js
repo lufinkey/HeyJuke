@@ -31,7 +31,7 @@ type State = {
 	currentConnection: ?HeyJukeConnection
 }
 
-export default class PlayerSettingsScreen extends PureComponent<Props,State> {
+export default class ConnectionSettingsScreen extends PureComponent<Props,State> {
 	constructor(props: Props) {
 		super(props);
 

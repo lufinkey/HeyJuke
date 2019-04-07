@@ -23,7 +23,7 @@ import PlaylistScreen from './media/PlaylistScreen';
 import SettingsScreen from './SettingsScreen';
 import AccountsSettingsScreen from './settings/AccountsSettingsScreen';
 import SpotifyAccountSettingsScreen from './settings/accounts/SpotifyAccountSettingsScreen';
-import PlayerSettingsScreen from './settings/PlayerSettingsScreen';
+import ConnectionSettingsScreen from './settings/ConnectionSettingsScreen';
 
 import PlayerTabBar from '../components/player/PlayerTabBar';
 
@@ -70,7 +70,7 @@ const TabNavigator = createBottomTabNavigator({
 		Settings: {screen:SettingsScreen},
 		AccountsSettings: {screen:AccountsSettingsScreen},
 		SpotifyAccountSettings: {screen:SpotifyAccountSettingsScreen},
-		PlayerSettings: {screen:PlayerSettingsScreen}
+		ConnectionSettings: {screen:ConnectionSettingsScreen}
 	}, {
 		initialRouteName: 'Settings',
 		navigationOptions: {

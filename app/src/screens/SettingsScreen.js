@@ -42,10 +42,10 @@ export default class SettingsScreen extends PureComponent<Props,State> {
 					}
 				},
 				{
-					key: 'player',
-					title: "Player",
+					key: 'connection',
+					title: "Connection",
 					onPress: () => {
-						this.props.navigation.push('PlayerSettings');
+						this.props.navigation.push('ConnectionSettings');
 					}
 				}
 			]
