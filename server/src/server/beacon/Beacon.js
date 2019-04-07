@@ -65,7 +65,7 @@ class Beaconer {
     }
 
     startTimer() {
-        this.timer = setInterval(() => this.doBroadcasts(), 3000);
+        this.timer = setInterval(() => this.doBroadcasts(), 500);
     }
 
     doBroadcasts() {
@@ -75,7 +75,7 @@ class Beaconer {
                     version: 0,
                     host: sa.addr.address,
                     port: this.cport,
-                    id: this.name
+                    name: this.name
                 }
             ));
 
