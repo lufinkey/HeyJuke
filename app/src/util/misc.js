@@ -11,56 +11,45 @@ export const sleep = (time: number): Promise<void> => {
 			resolve();
 		}, time);
 	});
-}
+};
 
 
 
 export const capitalizeString = (str: string): string => {
 	return str.charAt(0).toUpperCase() + str.slice(1);
-}
+};
 
 
 
-export const cloneContinuousAsyncGenerator = async function * (
-	generator: ContinuousAsyncGenerator,
-	options: {
-		initialResults?:Array<any>,
-		done?:boolean,
-		onYieldResult?: (result: any) => void,
-		onYieldError?: (error: Error) => void,
-		onYield?: (error: ?Error, result: ?any) => void
-	} = {}): ContinuousAsyncGenerator {
+export type GeneratorCloneOptions = {
+	initialResults?:Array<any>,
+	done?:boolean,
+	onYield?: (value: any) => void
+};
+
+export const cloneAsyncGenerator = async function *(generator: AsyncGenerator<any,any,any>, options: GeneratorCloneOptions = {}): AsyncGenerator<any,any,any> {
+	let params = null
 	if(options.initialResults) {
 		if(options.done) {
 			return { result: options.initialResults };
 		}
 		else {
-			yield { result: options.initialResults };
+			params = yield { result: options.initialResults };
 		}
 	}
 	while(true) {
-		const { value, done } = await generator.next();
+		const { value, done } = await generator.next(params);
 		if(options.onYield) {
-			options.onYield(value.error, value.result);
-		}
-		if(value.error) {
-			if(options.onYieldError) {
-				options.onYieldError(value.error);
-			}
-		}
-		else {
-			if(options.onYieldResult) {
-				options.onYieldResult(value.result);
-			}
+			options.onYield(value);
 		}
 		if(done) {
 			return value;
 		}
 		else {
-			yield value;
+			params = yield value;
 		}
 	}
-}
+};
 
 
 
@@ -73,7 +62,7 @@ export const formatLogDate = (date: Date): string => {
 		':'+(""+date.getMinutes()).padStart(2,'0')+
 		':'+(""+date.getSeconds()).padStart(2,'0')+
 		'.'+(""+date.getMilliseconds()).padStart(3,'0');
-}
+};
 
 
 
@@ -100,4 +89,17 @@ export const waitForEvent = (eventEmitter: EventEmitter, eventName: string, hand
 		}
 		eventEmitter.once(eventName, listener);
 	});
-}
+};
+
+
+export const arrayEquals = <T>(array1: Array<T>, array2: Array<T>, eq: (a:T,b:T) => boolean): boolean => {
+	if(array1.length !== array2.length) {
+		return false;
+	}
+	for(let i=0; i<array1.length; i++) {
+		if(!eq(array1[i],array2[i])) {
+			return false;
+		}
+	}
+	return true;
+};

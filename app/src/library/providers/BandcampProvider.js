@@ -72,7 +72,7 @@ class BandcampProvider implements MediaProvider {
 		};
 	}
 
-	async fetchItemData(item: MediaItem): Promise<any> {
+	async fetchItemData(item: MediaItem): Promise<Object> {
 		if(!item.uri) {
 			throw new Error("Cannot fetch item: missing URL");
 		}
@@ -97,7 +97,7 @@ class BandcampProvider implements MediaProvider {
 	}
 
 
-	async search(text: string, options: {} = {}): Promise<any> {
+	async search(text: string, options: {} = {}): Promise<Object> {
 		options = {
 			...options
 		};

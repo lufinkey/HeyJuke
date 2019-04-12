@@ -1,6 +1,7 @@
 
 import BandcampProvider from './BandcampProvider';
 import SpotifyProvider from './SpotifyProvider';
+import YoutubeProvider from './YoutubeProvider';
 import type { SpotifyUserLibraryResumeId } from './SpotifyProvider';
 import {
 	MediaItem
@@ -17,6 +18,8 @@ export const getMediaProvider = (name: MediaProviderName): MediaProvider => {
 			return BandcampProvider;
 		case 'spotify':
 			return SpotifyProvider;
+		case 'youtube':
+			return YoutubeProvider;
 		default:
 			throw new Error(`invalid provider name ${name}`);
 	}
@@ -29,7 +32,8 @@ export const createMediaItem = (data: Object, providerName: MediaProviderName): 
 
 export {
 	BandcampProvider,
-	SpotifyProvider
+	SpotifyProvider,
+	YoutubeProvider
 };
 
 export type {

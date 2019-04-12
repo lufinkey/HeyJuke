@@ -16,7 +16,7 @@ import {
 	Text
 } from '../../../components/theme';
 
-import BandcampProvider from '../../../library/providers/BandcampProvider';
+import YoutubeProvider from '../../../library/providers/YoutubeProvider';
 import MediaItemRow from '../../../components/MediaItemRow';
 import LoadableList from '../../../components/LoadableList';
 import {
@@ -40,14 +40,14 @@ type State = {
 }
 
 
-export default class BandcampSearchResultsScreen extends PureComponent<Props,State> {
+export default class YoutubeSearchResultsScreen extends PureComponent<Props,State> {
 	constructor(props: Props) {
 		super(props);
 
 		const query = props.screenProps?.query;
 		this.state = {
 			query: query,
-			generator: BandcampSearchResultsScreen.createSearchResultsGenerator(query || "")
+			generator: YoutubeSearchResultsScreen.createSearchResultsGenerator(query || "")
 		};
 	}
 
@@ -55,14 +55,18 @@ export default class BandcampSearchResultsScreen extends PureComponent<Props,Sta
 		if(!query) {
 			return { result: [] };
 		}
-		let page = 1;
+		let pageToken = null;
 		while(true) {
 			try {
-				const { items, nextURL } = await BandcampProvider.search(query, {
-					page: page
-				});
-				page += 1;
-				if(nextURL != null) {
+				const options: Object = {
+					maxResults: 24
+				};
+				if(pageToken != null) {
+					options.pageToken = pageToken;
+				}
+				const { items, nextPageToken } = await YoutubeProvider.search(query, options);
+				pageToken = nextPageToken;
+				if(nextPageToken != null) {
 					yield { result: items };
 				}
 				else {
@@ -81,7 +85,7 @@ export default class BandcampSearchResultsScreen extends PureComponent<Props,Sta
 			return {
 				...state,
 				query: query,
-				generator: BandcampSearchResultsScreen.createSearchResultsGenerator(query || "")
+				generator: YoutubeSearchResultsScreen.createSearchResultsGenerator(query || "")
 			};
 		}
 		return state;

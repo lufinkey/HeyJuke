@@ -8,7 +8,7 @@ import Album from './Album';
 import Artist from './Artist';
 import Playlist from './Playlist';
 
-import type { ContinuousAsyncGenerator } from './Generators';
+import type { ContinuousAsyncGenerator } from '../../util/Generators';
 
 import type { PlaybackState } from './PlaybackState';
 import type { PlaybackMetadata } from './PlaybackMetadata';
@@ -45,7 +45,7 @@ export interface MediaProvider {
 
 	createMediaItem(data: Object): MediaItem;
 
-	+search?: (text: string, options?: Object) => Promise<any>;
+	+search?: (text: string, options?: Object) => Promise<Object>;
 	+getTrack?: (uri: string) => Promise<Track>;
 	+getAlbum?: (uri: string) => Promise<Album>;
 	+getArtist?: (uri: string) => Promise<Artist>;
@@ -53,7 +53,7 @@ export interface MediaProvider {
 
 	+generateUserLibrary?: (resumeId?: ?Object) => ContinuousAsyncGenerator<{ resumeId: Object, items: Array<MediaLibraryItem>, progress: number }>;
 
-	+fetchItemData?: (item: MediaItem) => Promise<any>;
+	+fetchItemData?: (item: MediaItem) => Promise<Object>;
 
 	+player?: MediaPlaybackProvider;
 }

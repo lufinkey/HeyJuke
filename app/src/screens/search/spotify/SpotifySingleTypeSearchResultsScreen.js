@@ -25,7 +25,7 @@ import {
 } from '../../../library/types';
 import {
 	capitalizeString,
-	cloneContinuousAsyncGenerator
+	cloneAsyncGenerator
 } from '../../../util/misc';
 
 
@@ -82,15 +82,15 @@ export default class SpotifySingleTypeSearchResultsView extends PureComponent<Pr
 	}
 
 	static createSearchResultsGenerator(results: Object): AsyncMediaItemGenerator {
-		return cloneContinuousAsyncGenerator(results.generator, {
+		return cloneAsyncGenerator(results.generator, {
 			done: results.done,
-			initialResults: results.items.slice(0)
+			initialResult: results.items.slice(0)
 		});
 	}
 
 	extractItemKey = (item: MediaItem, index: number) => {
 		return 'searchResult-'+index;
-	}
+	};
 
 	getItemLayout = (data: any, index: number) => {
 		return {
@@ -98,13 +98,13 @@ export default class SpotifySingleTypeSearchResultsView extends PureComponent<Pr
 			offset: (MediaItemRow.HEIGHT * index),
 			index: index
 		};
-	}
+	};
 
 	renderItem = ({ item, index }: {item: MediaItem, index: number}) => {
 		return (
 			<MediaItemRow item={item} navigation={this.props.navigation}/>
 		);
-	}
+	};
 
 	render() {
 		return (

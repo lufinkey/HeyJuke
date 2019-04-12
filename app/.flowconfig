@@ -22,6 +22,7 @@
 [untyped]
 ; Ignore messed up react-native-marquee
 .*/node_modules/react-native-marquee/
+.*/node_modules/react-native-udp
 
 [include]
 

@@ -10,6 +10,9 @@ import type {
 import {
 	Track
 } from '../library/types';
+import {
+	YoutubeProvider
+} from '../library/providers';
 
 
 class HeyJukeClient {
@@ -101,8 +104,13 @@ class HeyJukeClient {
 	}
 
 	async addTrackToQueue(track: Track) {
+		let uri = track.uri;
+		if(track.provider.name === 'youtube') {
+			const { id } = YoutubeProvider.parseURI(uri);
+			uri = `https://www.youtube.com/watch?v=${id}`;
+		}
 		return await this.sendRequest('POST', 'queue', {
-			uri: track.uri,
+			uri: uri,
 			source: track.provider.name
 		});
 	}

@@ -212,11 +212,11 @@ export default class SpotifySearchResultsView extends PureComponent<Props,State>
 				</View>
 			) : (
 				<StackNavigator {...this.props}
-				initialRouteName={'SpotifyAllSearchResults'}
-				screenProps={{
-					...this.props.screenProps,
-					results: this.state.results
-				}}/>
+					initialRouteName={'SpotifyAllSearchResults'}
+					screenProps={{
+						...this.props.screenProps,
+						results: this.state.results
+					}}/>
 			)
 		);
 	}

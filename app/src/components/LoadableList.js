@@ -16,7 +16,7 @@ import {
 	Text
 } from '../components/theme';
 
-import type { ContinuousAsyncGenerator } from '../library/types';
+import type { ContinuousAsyncGenerator } from '../util/Generators';
 import { sleep } from '../util/misc';
 
 
@@ -107,7 +107,7 @@ export default class LoadableList extends PureComponent<Props,State> {
 			error: null
 		});
 		try {
-			const { value: { result, error }, done } = await generator.next();
+			const { value: { result, error }, done } = await (generator: any).next();
 			if(generator !== this.props.generator || !this.mounted) {
 				return;
 			}

@@ -13,9 +13,9 @@ import type {
 	MediaPlaybackProvider,
 	PlaybackState,
 	PlaybackMetadata,
-	PlaybackEvent,
-	ContinuousAsyncGenerator
+	PlaybackEvent
 } from '../types';
+import type { ContinuousAsyncGenerator } from '../../util/Generators';
 
 import EventEmitter from 'events';
 import RNEvents from 'react-native-events';
@@ -155,11 +155,11 @@ class SpotifyProvider implements MediaProvider {
 				// player paused. should we recover?
 				const currentTime = (new Date()).getTime();
 				if((currentTime - this._lastTemporaryIssuesTime) <= 60000) {
-					Logger.warn("Spotify paused seemingly because of a connection issue. Attempting to start playing again");
+					console.warn("Spotify paused seemingly because of a connection issue. Attempting to start playing again");
 					this._setPlayingUntilSuccess();
 				}
 				else {
-					Logger.warn("Spotify randomly paused, but it was outside of the expected time for it to be an error and not a remote");
+					console.warn("Spotify randomly paused, but it was outside of the expected time for it to be an error and not a remote");
 				}
 			}*/
 		}
@@ -252,7 +252,7 @@ class SpotifyProvider implements MediaProvider {
 	}
 
 
-	_preParseAlbum(album: any) {
+	_preParseAlbum(album: Object) {
 		const albumID = this._parseItemId(album.uri);
 		const trackResults = album.tracks;
 		if(trackResults) {
@@ -278,7 +278,7 @@ class SpotifyProvider implements MediaProvider {
 		return album;
 	}
 
-	_preParsePlaylist(playlist: any) {
+	_preParsePlaylist(playlist: Object) {
 		const playlistID = this._parseItemId(playlist.uri);
 		const trackResults = playlist.tracks;
 		if(trackResults) {
@@ -315,7 +315,7 @@ class SpotifyProvider implements MediaProvider {
 	}
 
 
-	async search(text: string, options: { types?: Array<string> } = {}): Promise<any> {
+	async search(text: string, options: { types?: Array<string> } = {}): Promise<Object> {
 		await this._fetchUserDataIfNeeded();
 		options = {
 			types: ['track','artist','album','playlist'],
@@ -545,6 +545,7 @@ class SpotifyProvider implements MediaProvider {
 			}
 			offset += items.length;
 		}
+		throw new Error("this code in SpotifyProvider.getArtistAlbums should never be reached");
 	}
 
 

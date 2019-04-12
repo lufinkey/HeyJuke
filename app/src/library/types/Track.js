@@ -13,6 +13,7 @@ import {
 	parseAlbum,
 	parseArtists
 } from './parse';
+import {arrayEquals} from "../../util/misc";
 
 
 export type TrackData = MediaItemData & {
@@ -43,7 +44,6 @@ export default class Track extends MediaItem {
 	album: ?Album = null;
 	artists: ?Array<Artist> = null;
 
-	duration: ?number = null;
 	audioURL: ?string = null;
 
 	_itemDataPromise: ?Promise<void> = null;
@@ -58,12 +58,6 @@ export default class Track extends MediaItem {
 		this.artists = parseArtists(data, provider);
 
 		// other data
-		if(data.duration) {
-			this.duration = data.duration;
-		}
-		else if(data.duration_ms) {
-			this.duration = data.duration_ms / 1000;
-		}
 		if(data.audioURL) {
 			this.audioURL = data.audioURL;
 		}
@@ -100,6 +94,17 @@ export default class Track extends MediaItem {
 	get trackNumber(): ?number {
 		const data = this.data;
 		return data.trackNumber ?? data.track_number ?? data.trackNum ?? null;
+	}
+
+	get duration(): ?number {
+		const data = this.data;
+		if(data.duration) {
+			return data.duration;
+		}
+		else if(data.duration_ms) {
+			return data.duration_ms / 1000;
+		}
+		return null;
 	}
 
 	isSingle(): boolean {
@@ -150,6 +155,7 @@ export default class Track extends MediaItem {
 	}
 
 	onFetchData(newData: Object) {
+		super.onFetchData(newData);
 		const data = this.data;
 		if(this.isMissingAlbumData()) {
 			this.album = parseAlbum(newData, this.provider);
@@ -162,13 +168,16 @@ export default class Track extends MediaItem {
 			data.available = newData.available;
 		}
 		if(newData.duration != null) {
-			this.duration = newData.duration;
+			data.duration = newData.duration;
 		}
 		if(data.images == null && newData.images != null) {
 			data.images = newData.images;
 		}
 		if(newData.imageURL != null) {
 			data.imageURL = newData.imageURL;
+		}
+		if(newData.artists && (!this.artists || !arrayEquals(newData.artists, this.artists, (a,b) => (a.uri === b.uri)))) {
+			this.artists = parseArtists(newData, this.provider);
 		}
 	}
 

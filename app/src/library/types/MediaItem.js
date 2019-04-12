@@ -1,6 +1,7 @@
 // @flow
 
 import { MediaProvider } from './MediaProvider';
+import { arrayEquals } from '../../util/misc';
 
 
 export type MediaItemImage = {
@@ -28,6 +29,7 @@ export default class MediaItem {
 	_provider: MediaProvider;
 
 	_itemDataPromise: ?Promise<void> = null;
+	_dataFetched: boolean = false;
 
 	constructor(data: Object, provider: MediaProvider) {
 		this._data = data;
@@ -158,25 +160,40 @@ export default class MediaItem {
 		return false;
 	}
 
-	async fetchItemData(): Promise<void> {
+	needsToFetchItemData(): boolean {
+		if(this._dataFetched || !this.isMissingData()) {
+			return false;
+		}
+		return true;
+	}
+
+	async fetchItemData(options: {force?:boolean} = {}): Promise<void> {
 		if(this._itemDataPromise) {
 			await this._itemDataPromise;
 		}
-		else if(!this.isMissingData() || !this.provider.fetchItemData) {
+		else if((this._dataFetched && !options.force) || !this.provider.fetchItemData || !this.isMissingData()) {
 			return;
 		}
 		this._itemDataPromise = (async () => {
-			const data = this.data;
-			const itemData = await (this.provider: any).fetchItemData(this);
-			this._itemDataPromise = null;
+			let itemData: Object = (null: any);
+			try {
+				itemData = await (this.provider: any).fetchItemData(this);
+				this._itemDataPromise = null;
+			} catch(error) {
+				this._itemDataPromise = null;
+				return;
+			}
+			this._dataFetched = true;
 			this.onFetchData(itemData);
 		})();
 		await this._itemDataPromise;
-		this._itemDataPromise = null;
 	}
 
-	onFetchData(data: any) {
-		// Open for implementation
+	onFetchData(newData: Object) {
+		const data = this._data;
+		if(newData.name) {
+			data.name = newData.name;
+		}
 	}
 
 	toData(): MediaItemData {

@@ -20,7 +20,6 @@ import type {
 } from "./TrackCollection";
 import type { MediaLibraryItem } from './MediaLibraryItem';
 import type {
-	ContinuousAsyncGenerator,
 	AsyncMediaItemGenerator,
 	AsyncTrackGenerator,
 	AsyncAlbumGenerator,
@@ -51,7 +50,6 @@ export type {
 	MediaItemImage,
 	MediaProvider,
 	MediaPlaybackProvider,
-	ContinuousAsyncGenerator,
 	AsyncMediaItemGenerator,
 	AsyncTrackGenerator,
 	AsyncAlbumGenerator,

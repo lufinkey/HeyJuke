@@ -47,7 +47,7 @@ type State = {
 export default class SpotifyAllSearchResultsView extends PureComponent<Props,State> {
 	static navigationOptions = {
 		header: null
-	}
+	};
 
 	needsStackReset: boolean = false;
 
@@ -115,13 +115,7 @@ export default class SpotifyAllSearchResultsView extends PureComponent<Props,Sta
 	}
 
 	resetStack() {
-		const resetAction = StackActions.reset({
-			index: 0,
-			actions: [
-				NavigationActions.navigate({ routeName: 'SpotifyAllSearchResults' })
-			]
-		});
-		this.props.navigation.dispatch(resetAction);
+		this.props.navigation.navigate('SpotifyAllSearchResults');
 	}
 
 	componentDidMount() {
@@ -141,7 +135,7 @@ export default class SpotifyAllSearchResultsView extends PureComponent<Props,Sta
 
 	extractItemKey = (item: MediaItem, index: number) => {
 		return 'searchResult-'+index;
-	}
+	};
 
 	getItemLayout = (data: any, index: number) => {
 		return {
@@ -149,13 +143,13 @@ export default class SpotifyAllSearchResultsView extends PureComponent<Props,Sta
 			offset: (MediaItemRow.HEIGHT * index),
 			index: index
 		};
-	}
+	};
 
 	onPressSeeAll = (itemType: string) => {
 		this.props.navigation.push('SpotifySingleTypeSearchResults', {
 			itemType: itemType
 		});
-	}
+	};
 
 	renderSectionHeader = ({ section: { title } }: {section: any}) => {
 		return (
@@ -163,7 +157,7 @@ export default class SpotifyAllSearchResultsView extends PureComponent<Props,Sta
 				<Text style={styles.sectionHeaderText}>{title}</Text>
 			</View>
 		);
-	}
+	};
 
 	renderSectionFooter = ({ section: { title, itemType, hasMore } }: {section: any}) => {
 		return (
@@ -175,13 +169,13 @@ export default class SpotifyAllSearchResultsView extends PureComponent<Props,Sta
 				) : null}
 			</View>
 		);
-	}
+	};
 
 	renderItem = ({ item, index, section }: {item: MediaItem, index: number, section: any}) => {
 		return (
 			<MediaItemRow item={item} navigation={this.props.navigation}/>
 		);
-	}
+	};
 
 	render() {
 		const sections = this.state.sections;

@@ -5,16 +5,16 @@ import MediaItem from './MediaItem';
 import type {
 	MediaItemData
 } from "./MediaItem";
-import type { ContinuousAsyncGenerator } from './Generators';
+import type { ContinuousAsyncGenerator, GeneratorResult } from '../../util/Generators';
 import Track from './Track';
 import type {
 	TrackData
 } from './Track';
 import { parseTrackCollectionItems } from './parse';
 import AsyncList from '../../util/AsyncList';
+import AwaitableGenerator from "../../util/AwaitableGenerator";
 
 
-export type AsyncTrackCollectionItemGenerator = ContinuousAsyncGenerator<Array<TrackCollectionItem>>
 
 export type TrackCollectionItemData = {
 	collectionURI: string,
@@ -60,6 +60,9 @@ export class TrackCollectionItem {
 		};
 	}
 }
+
+
+export type AsyncTrackCollectionItemGenerator = ContinuousAsyncGenerator<Array<TrackCollectionItem>>
 
 
 export type TrackCollectionOptions = {
@@ -260,29 +263,28 @@ export default class TrackCollection extends MediaItem {
 
 	async * createItemGenerator(): AsyncTrackCollectionItemGenerator {
 		const asyncItems = this._asyncItems;
-		if(!asyncItems) {
-			return { result: (this._items || []) };
+		if (!asyncItems) {
+			return {result: (this._items || [])};
 		}
 		const chunkSize = asyncItems.chunkSize;
 		let index = 0;
 		let chunkIndex = 0;
-		while(true) {
+		while (true) {
 			try {
 				await asyncItems.loadChunkIndex(chunkIndex);
-				const yieldedItems = asyncItems.items.slice(index, Math.min(index+chunkSize, asyncItems.items.length));
-				if(yieldedItems.length < chunkSize) {
-					return { result: yieldedItems };
-				}
-				else {
-					yield { result: yieldedItems };
+				const yieldedItems = (asyncItems.items: any).slice(index, Math.min(index + chunkSize, asyncItems.items.length));
+				if (yieldedItems.length < chunkSize) {
+					return {result: yieldedItems};
+				} else {
+					yield {result: yieldedItems};
 				}
 				index += chunkSize;
 				chunkIndex += 1;
-			}
-			catch(error) {
+			} catch (error) {
 				yield { error };
 			}
 		}
+		throw new Error("This code in TrackCollection.createItemGenerator should never get hit");
 	}
 
 
@@ -294,6 +296,7 @@ export default class TrackCollection extends MediaItem {
 	}
 
 	onFetchData(data: Object) {
+		super.onFetchData(data);
 		this._parseTrackCollectionData(data);
 	}
 

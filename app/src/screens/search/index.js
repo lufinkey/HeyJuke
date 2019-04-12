@@ -21,6 +21,7 @@ import {
 
 import SpotifySearchResultsScreen from './spotify/SpotifySearchResultsScreen';
 import BandcampSearchResultsScreen from './bandcamp/BandcampSearchResultsScreen';
+import YoutubeSearchResultsScreen from './youtube/YoutubeSearchResultsScreen';
 
 
 const createTabBarIcon = (props: Object) => {
@@ -37,7 +38,7 @@ const createTabBarIcon = (props: Object) => {
 			{...props}
 			style={style}/>
 	);
-}
+};
 
 export default createMaterialTopTabNavigator({
 	SpotifySearchTab: {
@@ -55,6 +56,15 @@ export default createMaterialTopTabNavigator({
 			title: "Bandcamp",
 			tabBarIcon: createTabBarIcon({
 				source: require('../../../assets/logo-bandcamp-small.png')
+			})
+		}
+	},
+	YoutubeSearchTab: {
+		screen: YoutubeSearchResultsScreen,
+		navigationOptions: {
+			title: "Youtube",
+			tabBarIcon: createTabBarIcon({
+				source: require('../../../assets/logo-youtube-small.png')
 			})
 		}
 	}
