@@ -21,10 +21,9 @@ import AsyncQueue from "../../util/AsyncQueue";
 import StreamPlayer from "../../playback/StreamPlayer";
 
 const YoutubeDL = require('ytdl-core');
-
+const YoutubeCredentials = require('../../../credentials/Youtube');
 
 const YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3';
-const YOUTUBE_API_KEY = 'AIzaSyA5_9RWBoQCX0SXS8unqH5sxPMZWY5ssSc';
 
 const entities = new AllHtmlEntities();
 
@@ -100,7 +99,7 @@ class YoutubeProvider implements MediaProvider {
 		return new Promise((resolve, reject) => {
 			query = {
 				...query,
-				key: YOUTUBE_API_KEY
+				key: YoutubeCredentials.apiKey
 			};
 			const xhr = new XMLHttpRequest();
 			xhr.onreadystatechange = () => {
