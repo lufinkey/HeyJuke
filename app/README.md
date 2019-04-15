@@ -17,6 +17,7 @@ npm install
 You will need to supply credentials for each service in the `credentials` folder.
 
 - Spotify - Setup your app credentials [here](https://developer.spotify.com/dashboard/applications) and enter them into `credentials/Spotify.json`
+- Youtube - Setup your youtube credentials in the Google Developer Console and enter them into `credentials/Youtube.json`
 
 ## Build and Run
 
