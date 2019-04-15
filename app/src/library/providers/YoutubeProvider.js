@@ -144,15 +144,15 @@ class YoutubeProvider implements MediaProvider {
 		switch(type) {
 			case 'video':
 				type = 'track';
-				uri = this.createURI(item.id.kind, item.id.videoId);
+				uri = this.createURI('video', item.id.videoId);
 				break;
 			case 'channel':
 				type = 'artist';
-				uri = this.createURI(item.id.kind, item.id.channelId);
+				uri = this.createURI('channel', item.id.channelId);
 				break;
 			case 'playlist':
 				type = 'playlist';
-				uri = this.createURI(item.id.kind, item.id.playlistId);
+				uri = this.createURI('playlist', item.id.playlistId);
 				break;
 			default:
 				throw new Error(`Unknown youtube search result type ${type}`);
