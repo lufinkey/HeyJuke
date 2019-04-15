@@ -104,13 +104,8 @@ class HeyJukeClient {
 	}
 
 	async addTrackToQueue(track: Track) {
-		let uri = track.uri;
-		if(track.provider.name === 'youtube') {
-			const { id } = YoutubeProvider.parseURI(uri);
-			uri = `https://youtube.com/v/${id}?version=3`;
-		}
 		return await this.sendRequest('POST', 'queue', {
-			uri: uri,
+			uri: track.uri,
 			source: track.provider.name
 		});
 	}
