@@ -12,7 +12,7 @@ Start the song at the specified path from the specified medium. Available media 
 
 ```local``` where the uri is a file path to a audio file on the local machine,
 
-```youtube``` where the uri is a YouTube URL in the format `http://www.youtube.com/v/VIDEO_ID?version=3`
+```youtube``` where the uri is a YouTube URL in the format `youtube:video:<VIDEO_ID>`
 
 ```bandcamp``` where the uri is a BandCamp URL.
 
