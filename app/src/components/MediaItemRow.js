@@ -220,7 +220,10 @@ export default class MediaItemRow extends PureComponent<Props,State> {
 	onPress() {
 		const item = this.props.item;
 		if(item instanceof Track || item instanceof TrackCollectionItem || item instanceof QueueItem) {
-			// TODO main press action
+			// show more menu
+			this.setState({
+				showMore: true
+			});
 		}
 		else if(item.type === 'album') {
 			if(this.props.navigation) {
