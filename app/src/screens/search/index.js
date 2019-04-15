@@ -41,15 +41,6 @@ const createTabBarIcon = (props: Object) => {
 };
 
 export default createMaterialTopTabNavigator({
-	SpotifySearchTab: {
-		screen: SpotifySearchResultsScreen,
-		navigationOptions: {
-			title: "Spotify",
-			tabBarIcon: createTabBarIcon({
-				source: require('../../../assets/logo-spotify-small.png')
-			})
-		}
-	},
 	BandcampSearchTab: {
 		screen: BandcampSearchResultsScreen,
 		navigationOptions: {
