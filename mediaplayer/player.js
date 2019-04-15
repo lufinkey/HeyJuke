@@ -57,9 +57,8 @@ function onPlayerReady(event) {
   event.target.playVideo();
 }
 
-var done = false;
 function onPlayerStateChange(event) {
-  if (event.data == 0 && !done) {
+  if (event.data == 0 || event.data == -1) {
     status.status = "waiting";
     send(status);
   }
@@ -109,7 +108,7 @@ async function playSong(args) {
     case 'youtube':
       currentMedia = args["source"];
       ytplayer.loadVideoByUrl(args["uri"], 0, "small")
-      ytplayer.playVideo();
+      ytplayer.playVideo();      
       status.status = "started"
       break;
     case 'spotify':
