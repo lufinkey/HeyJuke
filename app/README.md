@@ -26,7 +26,7 @@ You will need to supply credentials for each service in the `credentials` folder
 The iOS project is located in `ios/HeyJuke.xcodeproj`, which you can open using Xcode. Alternatively, you can just run the following command in a terminal:
 
 ```bash
-react-native run-ios
+react-native run-ios --variant=release
 ```
 
 ### Android
@@ -34,5 +34,5 @@ react-native run-ios
 The Android project is located in `android`, which you can open using Android Studio. Alternatively, you can just run the following command in a terminal:
 
 ```bash
-react-native run-android
+react-native run-android --variant=release
 ```
