@@ -109,6 +109,7 @@ async function playSong(args) {
     case 'youtube':
       currentMedia = args["source"];
       const uri = args["uri"];
+      console.log("Youtube uri ", uri);
       const uriParts = uri.split(':');
       if(uriParts[0] !== 'youtube') {
         throw new Error("Invalid youtube URI");
