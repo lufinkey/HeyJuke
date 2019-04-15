@@ -10,7 +10,7 @@
 ```
 Start the song at the specified path from the specified medium. Available media options are: 
 
-```local``` where the uri is a file path to a audio file on the local machine,
+```local``` where the uri is a file path to an audio file on the local machine,
 
 ```youtube``` where the uri is a YouTube URL in the format `youtube:video:<VIDEO_ID>`
 
