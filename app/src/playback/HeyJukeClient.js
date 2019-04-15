@@ -107,7 +107,7 @@ class HeyJukeClient {
 		let uri = track.uri;
 		if(track.provider.name === 'youtube') {
 			const { id } = YoutubeProvider.parseURI(uri);
-			uri = `https://www.youtube.com/watch?v=${id}`;
+			uri = `youtube.com/v/${id}?version=3`;
 		}
 		return await this.sendRequest('POST', 'queue', {
 			uri: uri,
