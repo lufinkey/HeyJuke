@@ -1,4 +1,5 @@
-const BandcampAPI = require("bandcamp-api")
+const BandcampAPI = require("bandcamp-api");
+const YoutubeDL = require('ytdl-core');
 let audio = new Audio();
 let bandcamp = new BandcampAPI();
 let currentMedia = "audio";
@@ -107,8 +108,31 @@ async function playSong(args) {
       break;
     case 'youtube':
       currentMedia = args["source"];
-      ytplayer.loadVideoByUrl(args["uri"], 0, "small")
-      ytplayer.playVideo();      
+      const uri = args["uri"];
+      const uriParts = uri.split(':');
+      if(uriParts[0] !== 'youtube') {
+        throw new Error("Invalid youtube URI");
+      }
+      else if(uriParts[1] !== 'video') {
+        throw new Error("Youtube URI is not a video uri");
+      }
+      const id = uriParts[2];
+      if(!id) {
+        throw new Error("URI missing video id component");
+      }
+      const url = `https://www.youtube.com/watch?v=${id}`;
+      const info = await new Promise((resolve, reject) => {
+        YoutubeDL.getInfo(url, (error, info) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(info);
+          }
+        });
+      });
+      const audioFormat = YoutubeDL.chooseFormat(info.formats, {format: 'mp3'});
+      audio.src = audioFormat.url;
+      audio.play();
       status.status = "started"
       break;
     case 'spotify':
