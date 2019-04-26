@@ -26,3 +26,9 @@ facets of the server. I created in-depth and thorough documentation for use in
 writing the mobile app documenting all possible queries between the app and the
 server. This documentation was very helpful as it made integration between the
 app and the server very easy, seamless, and predictable for both me and Luis.
+
+## John D'Alessandro
+
+My contribution to HeyJuke was mainly in the writing of the media player Electron app, which included working with a number of existing APIs to unify them into one single interface for our server. We designed our architecture last semester and were able to execute on that plan effectively. As planned, we were able to ship the Electron app such that it could communicte with the server with a consistent API. I personally learned a lot about JavaScript, copyright protection for streaming services, and websockets in order to create this module. 
+
+I succeeded in creating the media player, but there were obstacles. More than once we had disagreements about how the websocket API should be formatted and I had to change it a couple of times. This was a learning experience; we should have planned this out last semester as part of our user stories. I also struggled with Spotify, which requires its API clients to use a particular module to prevent copyright infringement. This is why we could not ship with Spotify in time for the expo: the process for obtaining a license for the module was too long and moving away from Electron would have meant overhauling a good portion of our architecture. 
