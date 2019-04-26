@@ -26,20 +26,3 @@ facets of the server. I created in-depth and thorough documentation for use in
 writing the mobile app documenting all possible queries between the app and the
 server. This documentation was very helpful as it made integration between the
 app and the server very easy, seamless, and predictable for both me and Luis.
-
-The group was able to make a functioning product that was able to live close to
-the original design vision. By working as a team, we were able to stick to our
-strengths and become more productive in building the final product. It forced us
-to document each of our modules so that other people on the team would be able
-to interact with them, and as a result I believe our product is easier to
-understand from a high level view than other projects where only one developer
-may have worked on it.
-
-The server section was probably one of the more straight forward sections of the
-project, however it didn't come without some solid work that was required with
-it. Comparatively, the music player section is far simpler in both complexity
-and raw code base size, but comes with the complexity of dealing with different
-music sources. The app is React Native, but still obviously requires a fair
-amount of code and working with to get correct. All in all, each section had
-their own challenges and difficulties.
-
