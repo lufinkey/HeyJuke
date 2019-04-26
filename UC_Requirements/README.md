@@ -34,6 +34,8 @@
 
 7. [Self-Assessment Essays](Self-Assessments.md)
 
+	- [Luis Finke](Self-Assessments.md#luis-finke)
+
 8. Professional Biographies
 
 	- [Luis Finke](biographies/LuisFinke.md)
