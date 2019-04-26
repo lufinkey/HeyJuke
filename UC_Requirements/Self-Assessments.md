@@ -9,3 +9,37 @@ Working with multiple streaming services was also a difficult obstacle. In many 
 Our group was able to create a working prototype of our app, with all module communicating with each other. The project as a whole helped me learn the ideal way to divide team work. Since each of us worked on an individual module, we only had to discuss the protocols for communication between our modules, and all implementation could be managed individually. This made our work clearer and our contributions more focused. In some cases, pair programming and debugging was an effective way to figure out and correct issues in specific modules.
 
 Another thing I learned about group work from this project was that groups tend to need a leader. Somebody has to take responsibility to make sure each member of the project gets their individual contribution done. It can’t necessarily be expected that everyone will remember, and if everyone in a group project joins with that mindset, projects could get done a lot faster and better. This may have been a shortcoming of our group, but it certainly ended as a learning experience.
+
+## Joe Hirschfeld
+
+On HeyJuke I was responsible for the server component. The server component is
+the piece of software which coordinates state and actions between both the
+mobile app and the player sub-application. This included features such as
+dynamic cached local file content indexing with fuzzy searching, a full
+expandable role based access control system with hooks for creating more
+authentication mechanisms, full queue subsystem with permission based management
+and control, as well as a dynamic key value settings store which enables all
+configuration of the server to occur from within the mobile application.
+
+The server itself is written in Node.js with libraries which assisted in many
+facets of the server. I created in-depth and thorough documentation for use in
+writing the mobile app documenting all possible queries between the app and the
+server. This documentation was very helpful as it made integration between the
+app and the server very easy, seamless, and predictable for both me and Luis.
+
+The group was able to make a functioning product that was able to live close to
+the original design vision. By working as a team, we were able to stick to our
+strengths and become more productive in building the final product. It forced us
+to document each of our modules so that other people on the team would be able
+to interact with them, and as a result I believe our product is easier to
+understand from a high level view than other projects where only one developer
+may have worked on it.
+
+The server section was probably one of the more straight forward sections of the
+project, however it didn't come without some solid work that was required with
+it. Comparatively, the music player section is far simpler in both complexity
+and raw code base size, but comes with the complexity of dealing with different
+music sources. The app is React Native, but still obviously requires a fair
+amount of code and working with to get correct. All in all, each section had
+their own challenges and difficulties.
+
