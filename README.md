@@ -46,4 +46,4 @@
 
 	- [Effort Matrix](UC_Requirements/Effort-Matrix.md)
 
-9. [Budget](Budget.md)
+9. [Budget](UC_Requirements/Budget.md)
