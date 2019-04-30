@@ -52,4 +52,4 @@ Some subsection specific documentation is located here:
 
 + [Server Specific](./server)
 
-+ [Requirements](./UC_Requirements)
++ [Senior Design Requirements](./UC_Requirements)
