@@ -1,55 +1,49 @@
 # HeyJuke
 
-HeyJuke is a party Jukebox - with HeyJuke, mutiple people are able to queue up
-songs from a variety of sources and have them played from a common source.
+## Table of Contents
 
-### Installation
+1. [Project Description](UC_Requirements/Project-Description.md)
 
-HeyJuke requires some installation steps to start an instance.
+2. User Stories and Design Diagrams
 
-#### Prerequisites
+	- [User Stories](UC_Requirements/User-Stories.md)
 
-Both the server and the media player require a valid Node.js (with npm)
-installation. Consult your operating system's documentation for information on
-how to install Node.
+	- Design Diagrams
+	
+		- [Level 0](UC_Requirements/diagrams/D0.svg)
 
-#### Steps
+		- [Level 1](UC_Requirements/diagrams/D1.svg)
 
-To install HeyJuke, you can run the following commands:
+		- [Level 2](UC_Requirements/diagrams/D2.svg)
 
-```
-git clone https://github.com/lufinkey/HeyJuke.git ~/heyjuke
-cd ~/heyjuke/server
-npm install
-cd ~/heyjuke/mediaplayer
-npm install
-```
+	- [Design Diagram Descriptions](UC_Requirements/diagrams/README.md)
 
-This will pull down the current HeyJuke source code then install the required
-package dependencies.
+3. [Test Cases](UC_Requirements/Test-Cases.pdf)
 
-### Running
+4. [User Manual](UserManual.md)
 
-HeyJuke can be run by first starting the server, then starting the mediaplayer.
+5. Slideshows
+	
+	- [Spring Presentation](UC_Requirements/presentation/spring-presentation.pdf)
+	
+	- [Fall Presentation](UC_Requirements/presentation/fall-presentation.pdf)
 
-```
-cd ~/heyjuke/server
-npm run start &
-cd ~/heyjuke/mediaplayer
-npm run start &
-```
+6. [Final Expo Poster](UC_Requirements/Poster.pdf)
 
-This will start both components in the correct order. You can also use a
-terminal multiplexer such as tmux to run both instances.
+7. [Self-Assessment Essays](UC_Requirements/Self-Assessments.md)
 
-### Subsection Documentation
+	- [Luis Finke](UC_Requirements/Self-Assessments.md#luis-finke)
+	
+	- [Joe Hirschfeld](UC_Requirements/Self-Assessments.md#joe-hirschfeld)
+	
+	- [John D'Alessandro](UC_Requirements/Self-Assessments.md#john-dalessandro)
 
-Some subsection specific documentation is located here:
+8. [Summary of Hours and Justification](UC_Requirements/Hours.md)
 
-+ [App Specific](./app)
+	- [Task List](UC_Requirements/Tasklist.md)
 
-+ [MediaPlayer Specific](./mediaplayer)
+	- [Timeline](UC_Requirements/Timeline.md)
 
-+ [Server Specific](./server)
+	- [Effort Matrix](UC_Requirements/Effort-Matrix.md)
 
-+ [Senior Design Requirements](./UC_Requirements)
+9. [Budget](Budget.md)
