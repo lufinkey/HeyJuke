@@ -51,4 +51,26 @@ Last semester, I worked with my group coming up with teh entire system architect
 
 Total Hours: 51
 
-During the first semester, work on each piece of documentation was split fairly evenly. I worked on each of the pieces of documentation, especially those related to the Mediaplayer. To make sure that the project was possible, I did research into the various APIs that we would have to use for streaming music. Finally, I had to research Electron and reacquaint myself with JavaScript once we decided that the Mediaplayer should use those technologies. In the second semester, most of my time was spent developing the project itself and participating in a number of integration meetings that we had with the whole team. I wrote the Mediaplayer, including a large portion to use the Spotify. Complications with the DRM in Spotify's streaming API made this work for naught, but this could potentially be an area for future exploration.
+During the first semester, work on each piece of documentation was split fairly evenly. I worked on each of the pieces of documentation, especially those related to the Mediaplayer. To make sure that the project was possible, I did research into the various APIs that we would have to use for streaming music. Finally, I had to research Electron and reacquaint myself with JavaScript once we decided that the Mediaplayer should use those technologies. In the second semester, most of my time was spent developing the project itself and participating in a number of integration meetings that we had with the whole team. I wrote the Mediaplayer, including a large portion to use the Spotify. Complications with the DRM in Spotify's streaming API made this work for naught, but this could potentially be an area for future exploration.3
+
+
+
+## Luis Finke
+
+- Semester 1 - 32 Hours
+	- 6 hours - Class work, presentations, designs
+	- 2 hours - Research into cross platform development
+	- 12 hours - Create Bandcamp scraping API
+	- 12 hours - Create app prototype with search functionality
+
+- Semester 2 - 37 Hours
+	- 1 hour - Write test plan
+	- 1 hour - Repository documentation
+	- 1 hour - Powerpoint editing
+	- 4 hours - Assemble poster
+	- 14 hours - Implement jukebox bridge in mobile app
+	- 16 hours - Implement local streaming in mobile app
+
+Total Hours: 69
+
+During the first semester, I worked on implementing a way to scrape data from the Bandcamp website. For this, I had to investigate the html structures in the website and write code to grab certain pieces of text from the page based on those structures. I also created the app prototype with basic search functionality, which involved unifying the data from multiple different sources and creating reusable screens for each type of media. During the second semester, I expanded on the mobile app and wrote UI and client code for communicating with the jukebox server. Then I implemented streaming functionality into the mobile app in order to eventually run the server directly from the app.
